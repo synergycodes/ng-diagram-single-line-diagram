@@ -1,0 +1,36 @@
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dangling-overlay__layer {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.dangling-overlay__pin {
+  position: absolute;
+  width: var(--handle-dot-size);
+  height: var(--handle-dot-size);
+  border-radius: 50%;
+  background: var(--c-surface);
+  border: var(--handle-dot-border) solid var(--c-brand-500);
+  transform: translate(-50%, -50%);
+  transition:
+    width var(--t-fast),
+    height var(--t-fast),
+    background var(--t-fast),
+    box-shadow var(--t-fast);
+
+  // Resting pin is a clean hollow ring; the glow lights up only as a snap target.
+  &.is-highlighted {
+    width: 14px;
+    height: 14px;
+    background: var(--c-brand-500);
+    box-shadow: 0 0 0 5px var(--c-focus-ring);
+  }
+}

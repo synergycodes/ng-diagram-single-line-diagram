@@ -1,0 +1,22 @@
+<ng-diagram
+  [model]="model"
+  [config]="config"
+  [middlewares]="middlewares"
+  [nodeTemplateMap]="nodeTemplateMap"
+  [edgeTemplateMap]="edgeTemplateMap"
+  (paletteItemDropped)="onPaletteItemDropped($event)"
+  (selectionMoved)="onSelectionMoved($event)"
+  (nodeDragEnded)="onNodeDragEnded($event)"
+  (nodeResizeEnded)="onNodeResizeEnded($event)"
+  (edgeDrawEnded)="onEdgeDrawEnded($event)"
+  (selectionRemoved)="onSelectionRemoved($event)"
+  (diagramInit)="onDiagramInit($event)"
+>
+  <ng-diagram-background type="grid" />
+</ng-diagram>
+<app-junction-overlay />
+<app-dangling-endpoints-overlay />
+<app-edge-reshape-overlay />
+<app-relink-overlay />
+<app-link-drop-preview-overlay />
+<app-zoom-toolbar [minimapNodeStyle]="minimapNodeStyle" />

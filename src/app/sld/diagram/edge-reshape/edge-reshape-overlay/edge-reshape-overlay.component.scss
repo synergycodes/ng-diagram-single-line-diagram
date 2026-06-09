@@ -1,0 +1,103 @@
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.reshape-overlay__layer {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+// Segment reshape handle. Idle: two light-gold grip bars parallel to the
+// segment, hugging the wire. Hover/drag: a double-arrow showing the drag axis
+// (↕ for a horizontal segment, ↔ for a vertical one).
+.reshape-overlay__handle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  color: var(--c-text); // arrow stroke (currentColor)
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  touch-action: none;
+
+  &.is-horizontal {
+    cursor: ns-resize;
+  }
+  &.is-vertical {
+    cursor: ew-resize;
+  }
+
+  // Idle grip bars (parallel to the segment, one each side of the wire).
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    background: var(--c-brand-700);
+    border-radius: var(--r-full);
+    transition: opacity var(--t-fast);
+  }
+
+  // Each bar is centred on the midpoint (translate -50%/-50%), then nudged
+  // ±5px perpendicular — so the wire passes exactly between the pair.
+  &.is-horizontal::before,
+  &.is-horizontal::after {
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 2px;
+  }
+  &.is-horizontal::before {
+    transform: translate(-50%, -50%) translateY(-5px);
+  }
+  &.is-horizontal::after {
+    transform: translate(-50%, -50%) translateY(5px);
+  }
+
+  &.is-vertical::before,
+  &.is-vertical::after {
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 14px;
+  }
+  &.is-vertical::before {
+    transform: translate(-50%, -50%) translateX(-5px);
+  }
+  &.is-vertical::after {
+    transform: translate(-50%, -50%) translateX(5px);
+  }
+
+  // Drag-direction arrow — hidden until hover / drag.
+  .reshape-overlay__arrow {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity var(--t-fast);
+    pointer-events: none;
+    // Halo keeps the arrow legible over the selected wire.
+    filter: drop-shadow(0 0 1.5px var(--c-canvas));
+  }
+  // Vertical segment drags horizontally → rotate the ↕ glyph to ↔.
+  &.is-vertical .reshape-overlay__arrow {
+    transform: rotate(90deg);
+  }
+
+  &:hover,
+  &.is-dragging {
+    &::before,
+    &::after {
+      opacity: 0;
+    }
+
+    .reshape-overlay__arrow {
+      opacity: 1;
+    }
+  }
+}

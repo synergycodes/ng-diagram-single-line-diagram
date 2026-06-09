@@ -1,0 +1,41 @@
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.relink-overlay__layer {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.relink-overlay__handle {
+  position: absolute;
+  width: var(--handle-dot-size);
+  height: var(--handle-dot-size);
+  border-radius: 50%;
+  background: var(--c-surface);
+  border: var(--handle-dot-border) solid var(--c-brand-500);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+  transition:
+    background var(--t-fast),
+    box-shadow var(--t-fast);
+
+  // Resting endpoint stays a clean hollow ring; the focus glow is a hover/drag cue.
+  &:hover {
+    box-shadow: 0 0 0 3px var(--c-focus-ring);
+  }
+
+  &:active,
+  &.is-dragging {
+    background: var(--c-brand-500);
+    box-shadow: 0 0 0 3px var(--c-focus-ring);
+    cursor: grabbing;
+  }
+}

@@ -1,0 +1,16 @@
+<span class="mode-toggle__label">Mode</span>
+<div class="mode-toggle__group" role="radiogroup" aria-label="Diagram edit mode">
+  @for (opt of options; track opt.value) {
+    <button
+      type="button"
+      role="radio"
+      class="mode-toggle__btn"
+      [class.is-active]="opt.value === mode()"
+      [attr.aria-checked]="opt.value === mode()"
+      [title]="opt.title"
+      (click)="select(opt.value)"
+    >
+      {{ opt.label }}
+    </button>
+  }
+</div>

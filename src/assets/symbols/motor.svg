@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 60 60" fill="none" stroke="currentColor">
+  <polygon points="32,38 33,36 32,34 34,34 35,32 36,34 38,34 37,36 38,38 35,37" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" fill="currentColor"/>
+  <ellipse cx="35" cy="35" rx="30" ry="30" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="35" y="35" text-anchor="middle" dominant-baseline="central" fill="currentColor" stroke="none" font-family="var(--font-mono, monospace)" font-size="14" font-weight="600">M</text>
+</svg>

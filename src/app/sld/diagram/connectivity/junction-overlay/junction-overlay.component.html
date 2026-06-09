@@ -1,0 +1,10 @@
+@for (d of dots(); track $index) {
+  <span
+    class="junction"
+    [style.left.px]="d.x"
+    [style.top.px]="d.y"
+    [style.width.px]="d.size"
+    [style.height.px]="d.size"
+    aria-hidden="true"
+  ></span>
+}

@@ -1,0 +1,12 @@
+<span
+  class="sld-wire__line"
+  [class.sld-wire__line--vertical]="isVertical()"
+  aria-hidden="true"
+></span>
+
+<ng-diagram-node-resize-adornment
+  [class.has-resize-top]="resizeVertical()"
+  [class.has-resize-bottom]="resizeVertical()"
+  [class.has-resize-left]="resizeHorizontal()"
+  [class.has-resize-right]="resizeHorizontal()"
+/>

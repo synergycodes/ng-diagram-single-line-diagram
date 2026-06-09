@@ -1,0 +1,98 @@
+// Field component host (shared by sld-input + sld-select). Block so it doesn't
+// add inline line-box spacing between fields — the form's flex gap owns the rhythm.
+:host {
+  display: block;
+}
+
+// Sidebar input field — label stacked 2px above the recessed input element.
+.sld-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1); // 2px — label→element gap
+
+  &__label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-2);
+    font-size: var(--fs-10);
+    font-weight: var(--fw-regular);
+    color: var(--c-text-2);
+    letter-spacing: var(--ls-tight);
+  }
+
+  &__label-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__unit {
+    font-family: var(--font-mono);
+    font-size: var(--fs-10);
+    font-weight: var(--fw-regular);
+    color: var(--c-text-3);
+    flex-shrink: 0;
+  }
+
+  &__input {
+    width: 100%;
+    // Height comes from padding (10px vertical / 12px horizontal),
+    // not a fixed height — keeps it ~38px and matches the textarea sizing model.
+    padding: var(--s-5) var(--s-6);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-sm);
+    background: var(--c-field-bg);
+    color: var(--c-text);
+    font-family: var(--font-sans);
+    font-size: var(--fs-12);
+    line-height: var(--lh-snug);
+    outline: none;
+    transition:
+      border-color var(--t-fast),
+      box-shadow var(--t-fast);
+
+    &:hover:not(:focus) {
+      border-color: var(--c-border-strong);
+    }
+
+    &:focus {
+      border-color: var(--c-brand-500);
+      box-shadow: 0 0 0 3px var(--c-focus-ring);
+    }
+
+    &::placeholder {
+      color: var(--c-text-4);
+    }
+
+    &[type='number'] {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      // Drop the native spin buttons — they clutter the field on hover/focus.
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    &[type='number']::-webkit-outer-spin-button,
+    &[type='number']::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &--select {
+      appearance: none;
+      padding-right: var(--s-8);
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--c-text-3) 50%),
+        linear-gradient(135deg, var(--c-text-3) 50%, transparent 50%);
+      background-position:
+        calc(100% - 13px) 50%,
+        calc(100% - 9px) 50%;
+      background-size:
+        4px 4px,
+        4px 4px;
+      background-repeat: no-repeat;
+      cursor: pointer;
+    }
+  }
+}

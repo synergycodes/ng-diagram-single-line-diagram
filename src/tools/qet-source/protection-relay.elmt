@@ -1,0 +1,15 @@
+<definition version="0.100.0" type="element" link_type="simple" width="40" height="56" hotspot_x="20" hotspot_y="28">
+    <names>
+        <name lang="en">Protection relay</name>
+    </names>
+    <informations>IEC 60617 generic protection relay (square body, function-code label). Author: SLD Builder.</informations>
+    <description>
+        <rect x="-16" y="-16" width="32" height="32" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <line x1="0" y1="-28" x2="0" y2="-16" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <line x1="-8" y1="16" x2="-8" y2="28" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <line x1="8" y1="16" x2="8" y2="28" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <terminal name="" x="0" y="-28" orientation="n" type="Generic"/>
+        <terminal name="" x="-8" y="28" orientation="s" type="Generic"/>
+        <terminal name="" x="8" y="28" orientation="s" type="Generic"/>
+    </description>
+</definition>

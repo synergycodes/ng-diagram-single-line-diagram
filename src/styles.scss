@@ -1,0 +1,91 @@
+@import './tokens.css';
+@import 'ng-diagram/styles.css';
+
+// ──────────────────────────────────────────────────────────────────────────
+// Resize-adornment overrides
+//
+// Replace ng-diagram's default "4 corner handles + 4 full-edge lines" with a
+// minimal set of mid-edge handles ONLY on the sides that have a terminal +
+// lead. The symbol/wire components emit `has-resize-{side}` host classes;
+// everything not whitelisted stays hidden.
+//
+// Why global: the resize-line and resize-handle inner components are not
+// exported by ng-diagram, so we can't intercept their templates. Targeting
+// them by their stable class names is the cleanest hook.
+// ──────────────────────────────────────────────────────────────────────────
+
+ng-diagram-node-resize-adornment {
+  // Kill the 4 corner handles outright — we never want them on SLD symbols.
+  ng-diagram-resize-handle {
+    display: none;
+  }
+
+  // Hide all edge lines by default; the per-side rules below re-enable the
+  // ones that match a terminal-with-lead.
+  ng-diagram-resize-line {
+    display: none;
+
+    // Remove the default full-edge border line. We replace the visual with a
+    // small square via the line's `::before` pseudo-element (handled by
+    // ng-diagram's existing CSS — we just restyle it).
+    border-top: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    border-left: 0 !important;
+
+    &::before {
+      // Override ng-diagram's default 100%-wide hover strip with a compact,
+      // visible square centred on the edge — sits right on the terminal point.
+      width: 10px !important;
+      height: 10px !important;
+      background-color: var(--c-brand-500);
+      border: 1.5px solid var(--c-canvas);
+      border-radius: 2px;
+      box-sizing: border-box;
+    }
+  }
+
+  &.has-resize-top ng-diagram-resize-line.resize-line--top {
+    display: block;
+  }
+  &.has-resize-right ng-diagram-resize-line.resize-line--right {
+    display: block;
+  }
+  &.has-resize-bottom ng-diagram-resize-line.resize-line--bottom {
+    display: block;
+  }
+  &.has-resize-left ng-diagram-resize-line.resize-line--left {
+    display: block;
+  }
+}
+
+// Linking mode is for wiring connections, not adjusting geometry — hide every
+// resize handle so the side mid-edge markers don't compete with port hitboxes.
+// Hidden = no hit area, so the gesture is suppressed too.
+app-diagram.mode-linking ng-diagram-resize-line {
+  display: none !important;
+}
+
+// Chromium palette drag-image fix: ng-diagram clones the preview into <body>
+// for `setDragImage`. The cloned inner `.dragged-node` is position:absolute,
+// collapsing the outer's bounding rect to 0×0 — Chromium then clips the drag
+// image to nothing. Restoring static positioning on the inner clone restores
+// the rect. Selector matches ONLY the body-rooted clone, never the original.
+body > .dragged-node > .dragged-node {
+  position: static !important;
+  left: auto !important;
+}
+
+// Respect prefers-reduced-motion: collapse every animation and transition.
+// Covers the infinite link-drop pulses, the toolbar entrance animations, and
+// all token-driven transitions. WCAG 2.1 SC 2.3.3.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

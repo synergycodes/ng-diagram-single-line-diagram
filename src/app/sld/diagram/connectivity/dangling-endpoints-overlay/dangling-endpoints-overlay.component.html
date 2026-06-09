@@ -1,0 +1,13 @@
+@if (visible()) {
+  <div class="dangling-overlay__layer" [style.transform]="transform()">
+    @for (e of endpoints(); track e.edgeId + ':' + e.side; let i = $index) {
+      <span
+        class="dangling-overlay__pin"
+        [class.is-highlighted]="i === highlightedIndex()"
+        [style.left.px]="e.position.x"
+        [style.top.px]="e.position.y"
+        aria-hidden="true"
+      ></span>
+    }
+  </div>
+}

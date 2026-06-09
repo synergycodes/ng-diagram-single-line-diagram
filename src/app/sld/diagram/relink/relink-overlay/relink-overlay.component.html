@@ -1,0 +1,11 @@
+<div class="relink-overlay__layer" [style.transform]="transform()">
+  @for (h of handles(); track h.edgeId + ':' + h.side) {
+    <span
+      class="relink-overlay__handle"
+      [style.left.px]="h.position.x"
+      [style.top.px]="h.position.y"
+      (pointerdown)="onPointerDown($event, h)"
+      aria-hidden="true"
+    ></span>
+  }
+</div>

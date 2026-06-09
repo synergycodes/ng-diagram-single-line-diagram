@@ -1,0 +1,310 @@
+/* SLD design tokens — two tiers, so re-skinning is a one-token swap.
+
+   Tier 1 · PRIMITIVES — raw ramps from the ngDiagram design system, theme-
+   independent. Nothing here is consumed by components directly.
+   Tier 2 · SEMANTIC (--c-*) — per-theme aliases that reference primitives.
+   Components use ONLY these, never a raw --prim-* / hex. acc6 (gold accent) is
+   one ramp: light picks acc6-500, dark picks acc6-400 (lighter on dark).
+
+   Light is the default (:root); dark overrides on html[data-theme='dark'] — the
+   attribute ng-diagram keys its theme on, so --c-* and --ngd-* flip together.
+   Layout tokens (type/spacing/radii/sizes/motion/z) are theme-independent. */
+
+/* Shared — theme-independent layout (type, spacing, radii, sizes, motion, z). */
+:root {
+  /* -- Type ----------------------------------------------------- */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  --fs-10: 10px;
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px; /* default UI */
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-18: 18px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-32: 32px;
+  --fs-44: 44px;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semi: 600;
+  --fw-bold: 700;
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.3;
+  --lh-normal: 1.5;
+
+  --ls-tight: -0.01em;
+  --ls-tighter: -0.02em;
+
+  /* -- Spacing (4px base) --------------------------------------- */
+  --s-0: 0;
+  --s-1: 2px;
+  --s-2: 4px;
+  --s-3: 6px;
+  --s-4: 8px;
+  --s-5: 10px;
+  --s-6: 12px;
+  --s-8: 16px;
+  --s-10: 20px;
+  --s-12: 24px;
+  --s-14: 28px;
+  --s-16: 32px;
+  --s-20: 40px;
+  --s-24: 48px;
+
+  /* -- Radii ---------------------------------------------------- */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-full: 999px;
+
+  /* -- Sizes ---------------------------------------------------- */
+  --h-header: 48px; /* floating navbar height */
+  --gutter: var(--s-6); /* 12px — outer margin shared by all floating chrome */
+  --h-statusbar: 28px;
+  --w-rail: 48px;
+  --w-panel-lib: 320px; /* library palette — 2 columns of 138px tiles */
+  --w-panel-prop: 320px; /* right sidebar / properties */
+  --h-control: 28px;
+  --h-control-sm: 24px;
+  --h-control-lg: 32px;
+
+  /* -- Diagram strokes (theme-independent part) ----------------- */
+  /* Dasharray for control links (IEC 60617 signalling). Power links are solid. */
+  --dash-control: 4 3;
+
+  /* -- Motion --------------------------------------------------- */
+  --t-fast: 120ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  --t-normal: 180ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  --t-slow: 260ms cubic-bezier(0.2, 0.6, 0.2, 1);
+
+  /* -- Z-index -------------------------------------------------- */
+  --z-canvas: 0;
+  --z-panel: 10;
+  --z-header: 20;
+  --z-popover: 40;
+  --z-modal: 60;
+  --z-toast: 80;
+}
+
+/* ============================================================================
+   TIER 3 · COMPONENT — interaction affordances shared across overlays + nodes.
+   Centralises sizes previously duplicated and hand-synced across the relink,
+   junction, dangling, and symbol-port stylesheets. Theme-independent.
+   ========================================================================== */
+:root {
+  --port-hit-size: 16px; /* transparent grab target; mirrors PORT_SNAP_PX (GRID*2) in geometry/constants.ts */
+  --port-dot-size: 8px; /* visible symbol-port dot */
+  --handle-dot-size: 10px; /* relink / junction / dangling connection ring */
+  --handle-dot-border: 1.5px; /* ring stroke — distinct from the 2px symbol STROKE_WIDTH */
+}
+
+/* ============================================================================
+   TIER 1 · PRIMITIVES — ngDiagram design-system ramps, theme-independent.
+   Nothing here is consumed by components directly; Tier-2 references it.
+   ========================================================================== */
+:root {
+  /* -- Neutral · gray ramp -------------------------------------- */
+  --prim-gray-100: #ffffff;
+  --prim-gray-200: #f5f5f7;
+  --prim-gray-300: #edeff3;
+  --prim-gray-400: #d5d8e0;
+  --prim-gray-450: #bdc1cc;
+  --prim-gray-500: #6f7480;
+  --prim-gray-600: #4d5059;
+  --prim-gray-650: #383a40;
+  --prim-gray-700: #27282b;
+  --prim-gray-800: #151516;
+  --prim-gray-900: #070708;
+
+  /* Neutral alpha — interaction tints (gray-900 on light, gray-100 on dark). */
+  --prim-gray-900-5: rgba(7, 7, 8, 0.05);
+  --prim-gray-900-10: rgba(7, 7, 8, 0.1);
+  --prim-gray-900-50: rgba(7, 7, 8, 0.5);
+  --prim-gray-100-5: rgba(255, 255, 255, 0.05);
+  --prim-gray-100-10: rgba(255, 255, 255, 0.1);
+  --prim-gray-100-50: rgba(255, 255, 255, 0.5);
+
+  /* -- Accent · acc6 (gold) — light uses 500, dark uses 400 ----- */
+  --prim-acc6-50: #fffceb;
+  --prim-acc6-100: #fdf5c8;
+  --prim-acc6-200: #fbe783;
+  --prim-acc6-300: #f9d850;
+  --prim-acc6-400: #f8c527;
+  --prim-acc6-500: #f2a50e;
+  --prim-acc6-600: #d67e09;
+  --prim-acc6-700: #b1590c;
+  --prim-acc6-800: #904410;
+  --prim-acc6-900: #763811;
+  --prim-acc6-950: #441c04;
+  /* Translucent acc6 (selection tint + focus ring) — derived; DS has no acc6 alpha. */
+  --prim-acc6-500-16: rgba(242, 165, 14, 0.16);
+  --prim-acc6-500-40: rgba(242, 165, 14, 0.4);
+  --prim-acc6-400-16: rgba(248, 197, 39, 0.16);
+  --prim-acc6-400-40: rgba(248, 197, 39, 0.4);
+
+  /* -- Orange — node-selection card (fill + outer frame) -------- */
+  --prim-orange-400: #d99100;
+  --prim-orange-400-10: rgba(217, 145, 0, 0.1);
+  --prim-orange-400-20: rgba(217, 145, 0, 0.2);
+}
+
+/* ============================================================================
+   TIER 2 · SEMANTIC — light theme (default). Neutral-gray chrome on a white
+   canvas, dark symbols, acc6 gold accent (ngDiagram template).
+   ========================================================================== */
+:root,
+html[data-theme='light'] {
+  /* -- Neutrals -------------------------------------------------- */
+  --c-bg: var(--prim-gray-300); /* app backdrop */
+  --c-surface: var(--prim-gray-200); /* chrome panels (header, sidebars, toolbar) */
+  --c-surface-2: var(--prim-gray-100); /* tiles / cards — white on the gray panel */
+  --c-surface-3: var(--prim-gray-200); /* pressed / selected */
+  --c-canvas: var(--prim-gray-100); /* white diagram canvas */
+
+  --c-field-bg: var(--prim-gray-300); /* input / textarea fill (recessed) */
+
+  --c-border: var(--prim-gray-400); /* default control border */
+  --c-border-strong: var(--prim-gray-450); /* hover / emphasised */
+  --c-divider: var(--prim-gray-300);
+
+  --c-text: var(--prim-gray-800); /* primary text + symbol stroke (dark on canvas) */
+  --c-text-2: var(--prim-gray-600); /* secondary */
+  --c-text-3: var(--prim-gray-500); /* tertiary, labels, hints */
+  --c-text-4: var(--prim-gray-450); /* placeholder */
+  --c-text-inv: var(--prim-gray-800); /* text/icon on an acc6 fill (light → dark) */
+
+  /* -- Brand · acc6 (gold) — 50 tint · 500 accent · 600 hover · 700 on-tint text */
+  --c-brand-50: var(--prim-acc6-500-16);
+  --c-brand-500: var(--prim-acc6-500); /* primary accent (Export, active tool) */
+  --c-brand-600: var(--prim-acc6-600); /* hover / deeper */
+  --c-brand-700: var(--prim-acc6-700); /* dark gold — text/icon on a tint surface */
+
+  /* Selection — acc6 accent. */
+  --c-selection-bd: var(--prim-acc6-500);
+  --c-focus-ring: var(--prim-acc6-500-40);
+
+  /* Node interaction backdrops — gray-900 tints over the light canvas. */
+  --c-node-hover: var(--prim-gray-900-5);
+  --c-node-selected: var(--prim-gray-900-10); /* generic pressed tint (toolbar) */
+
+  /* Node selection card — orange fill, thin acc6 inner border,
+     thicker orange outer frame, dark labels. */
+  --c-node-sel-bg: var(--prim-orange-400-10); /* fill — orange-400 @ 10% */
+  --c-node-selected-bd: var(--prim-acc6-600); /* inner (thin) border — acc6-600 */
+  --c-node-sel-bd-outer: var(--prim-orange-400-20); /* outer (thick) border — orange-400 @ 20% */
+  --c-node-sel-label: var(--prim-gray-900); /* selected labels — gray-900 */
+
+  /* -- Voltage levels (domain colors — voltage chips / minimap) - */
+  --c-volt-lv: #15a34a; /* LV  · < 1 kV */
+  --c-volt-mv: #ea580c; /* MV  · 1–35 kV */
+  --c-volt-hv: #dc2626; /* HV  · 35–230 kV */
+  --c-volt-ehv: #7c3aed; /* EHV · > 230 kV */
+  --c-volt-dc: #0891b2; /* DC */
+
+  /* -- Link kinds ----------------------------------------------- */
+  --c-control: #0284c7; /* control link (cyan/blue, dashed) */
+
+  /* -- Diagram strokes — links recede vs the symbol stroke ------ */
+  --c-edge: var(--prim-gray-900-50);
+
+  /* -- Shadows (floating UI only) ------------------------------- */
+  --sh-xs: 0 1px 0 rgba(0, 0, 0, 0.04);
+  --sh-sm: 0 1px 2px rgba(17, 24, 39, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --sh-md: 0 4px 12px rgba(17, 24, 39, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================================================
+   TIER 2 · SEMANTIC — dark theme. Graphite chrome on a near-black canvas, white
+   symbols, acc6 gold accent (lighter stop than light mode).
+   ========================================================================== */
+html[data-theme='dark'] {
+  /* -- Neutrals -------------------------------------------------- */
+  --c-bg: var(--prim-gray-800); /* app backdrop */
+  --c-surface: var(--prim-gray-700); /* chrome panels */
+  --c-surface-2: var(--prim-gray-650); /* tiles / cards / hover */
+  --c-surface-3: var(--prim-gray-600); /* pressed / selected */
+  --c-canvas: var(--prim-gray-800); /* near-black diagram canvas */
+
+  --c-field-bg: var(--prim-gray-800); /* input / textarea fill (recessed) */
+
+  --c-border: var(--prim-gray-600); /* default control border */
+  --c-border-strong: var(--prim-gray-500); /* hover / emphasised */
+  --c-divider: var(--prim-gray-650);
+
+  --c-text: var(--prim-gray-100); /* primary text + symbol stroke (white on canvas) */
+  --c-text-2: var(--prim-gray-400); /* secondary */
+  --c-text-3: var(--prim-gray-500); /* tertiary, labels, hints */
+  --c-text-4: var(--prim-gray-600); /* placeholder */
+  --c-text-inv: var(--prim-gray-800); /* text/icon on an acc6 fill (dark) */
+
+  /* -- Brand · acc6 (gold, lighter stop for dark) -------------- */
+  --c-brand-50: var(--prim-acc6-400-16);
+  --c-brand-500: var(--prim-acc6-400); /* primary accent (Export, active tool) */
+  --c-brand-600: var(--prim-acc6-500); /* hover / deeper */
+  --c-brand-700: var(--prim-acc6-200); /* light gold — text/icon on a tint surface */
+
+  /* Selection — acc6 accent (dark). */
+  --c-selection-bd: var(--prim-acc6-400);
+  --c-focus-ring: var(--prim-acc6-400-40);
+
+  /* Node interaction backdrops — gray-100 tints over the dark canvas. */
+  --c-node-hover: var(--prim-gray-100-5);
+  --c-node-selected: var(--prim-gray-100-10); /* generic pressed tint (toolbar) */
+
+  /* Node selection card — dark treatment (light-gold border on a white tint). */
+  --c-node-sel-bg: var(--prim-gray-100-10);
+  --c-node-selected-bd: var(--prim-acc6-200);
+  --c-node-sel-bd-outer: var(--c-border-strong);
+  --c-node-sel-label: var(--prim-acc6-200);
+
+  /* -- Voltage levels (domain colors — voltage chips / minimap) - */
+  --c-volt-lv: #34d399; /* LV  · < 1 kV */
+  --c-volt-mv: #fb923c; /* MV  · 1–35 kV */
+  --c-volt-hv: #fb6b6b; /* HV  · 35–230 kV */
+  --c-volt-ehv: #a78bfa; /* EHV · > 230 kV */
+  --c-volt-dc: #22d3ee; /* DC */
+
+  /* -- Link kinds ----------------------------------------------- */
+  --c-control: #4fc3f7; /* control link (cyan, dashed) */
+
+  /* -- Diagram strokes — links recede vs the symbol stroke ------ */
+  --c-edge: var(--prim-gray-100-50);
+
+  /* -- Shadows (floating UI only) ------------------------------- */
+  --sh-xs: 0 1px 0 rgba(0, 0, 0, 0.4);
+  --sh-sm: 0 1px 2px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.4);
+  --sh-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Reset basics shared across the app */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: var(--c-text);
+  background: var(--c-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button {
+  font: inherit;
+  color: inherit;
+}

@@ -1,0 +1,63 @@
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.link-drop-preview__layer {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.link-drop-preview__ghost-junction {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c-surface);
+  border: 1.75px dashed var(--c-brand-500);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: link-drop-preview-pulse 1.4s ease-in-out infinite;
+}
+
+.link-drop-preview__snap-port {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid var(--c-brand-500);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: link-drop-preview-snap-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes link-drop-preview-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+    box-shadow: 0 0 0 0 var(--c-focus-ring);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 4px var(--c-focus-ring);
+  }
+}
+
+@keyframes link-drop-preview-snap-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 0 0 var(--c-focus-ring);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.12);
+    box-shadow: 0 0 0 4px var(--c-focus-ring);
+  }
+}

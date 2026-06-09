@@ -1,0 +1,14 @@
+<label class="sld-field">
+  <span class="sld-field__label">
+    <span class="sld-field__label-text">{{ props.label }}</span>
+  </span>
+  <select
+    class="sld-field__input sld-field__input--select"
+    [formControl]="formControl"
+    [formlyAttributes]="field"
+  >
+    @for (opt of selectOptions(); track opt.value) {
+      <option [value]="opt.value">{{ opt.label }}</option>
+    }
+  </select>
+</label>

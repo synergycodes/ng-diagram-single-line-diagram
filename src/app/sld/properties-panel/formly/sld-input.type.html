@@ -1,0 +1,14 @@
+<label class="sld-field">
+  <span class="sld-field__label">
+    <span class="sld-field__label-text">{{ props.label }}</span>
+    @if (props['unit']) {
+      <span class="sld-field__unit">{{ props['unit'] }}</span>
+    }
+  </span>
+  <input
+    class="sld-field__input"
+    [type]="props['inputType'] || 'text'"
+    [formControl]="formControl"
+    [formlyAttributes]="field"
+  />
+</label>

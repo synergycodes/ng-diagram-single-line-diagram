@@ -1,0 +1,14 @@
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+// Dimensions set inline per-instance. Avoid parent `transform: scale()` — it rasterises the dot into a halo on zoom.
+.junction {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--c-text);
+  transform: translate(-50%, -50%);
+}

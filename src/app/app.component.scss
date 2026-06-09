@@ -1,0 +1,11 @@
+// AppComponent is a slim shell — just <router-outlet />. The SLD layout lives
+// in SldPageComponent (floating-chrome over a full-bleed canvas).
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-sans);
+}

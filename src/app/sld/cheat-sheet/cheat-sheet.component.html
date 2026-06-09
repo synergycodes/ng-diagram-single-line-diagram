@@ -1,0 +1,18 @@
+@for (group of groups; track group.title) {
+  <div class="cheat-sheet__group">
+    <div class="cheat-sheet__group-title">{{ group.title }}</div>
+    @for (row of group.rows; track row.label) {
+      <div class="cheat-sheet__row">
+        <span class="cheat-sheet__keys">
+          @for (k of row.keys; track $index; let last = $last) {
+            <kbd class="cheat-sheet__kbd">{{ k }}</kbd>
+            @if (!last) {
+              <span class="cheat-sheet__sep">+</span>
+            }
+          }
+        </span>
+        <span class="cheat-sheet__label">{{ row.label }}</span>
+      </div>
+    }
+  </div>
+}

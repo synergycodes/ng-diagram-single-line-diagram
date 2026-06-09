@@ -1,0 +1,19 @@
+<div class="link-drop-preview__layer" [style.transform]="transform()">
+  @if (snapTargetPort(); as p) {
+    <span
+      class="link-drop-preview__snap-port"
+      [style.left.px]="p.x"
+      [style.top.px]="p.y"
+      aria-hidden="true"
+    ></span>
+  } @else {
+    @if (edgeHit(); as p) {
+      <span
+        class="link-drop-preview__ghost-junction"
+        [style.left.px]="p.x"
+        [style.top.px]="p.y"
+        aria-hidden="true"
+      ></span>
+    }
+  }
+</div>

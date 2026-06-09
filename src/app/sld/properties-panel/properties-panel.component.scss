@@ -1,0 +1,173 @@
+// Box (position + size) is set by the page (`.sld-props`); `.prop` stretches to
+// fill it. No width/height here — they'd collide with the page's absolute rect.
+:host {
+  display: flex;
+  font-family: var(--font-sans);
+}
+
+// Nothing selected → collapse out of the floating layout (page hides the box).
+:host(.is-empty) {
+  display: none;
+}
+
+.prop {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-md);
+  overflow: hidden;
+  color: var(--c-text);
+
+  &__header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--s-6);
+    padding: var(--s-5) var(--s-4) var(--s-5) var(--s-6);
+  }
+
+  &__thumb {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    padding: var(--s-3);
+    border-radius: var(--r-md);
+    background: var(--c-surface-2);
+    color: var(--c-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    :host ::ng-deep & > svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+  }
+
+  &__heading {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--fs-14);
+    font-weight: var(--fw-semi);
+    color: var(--c-text);
+    letter-spacing: var(--ls-tight);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: var(--fs-11);
+    color: var(--c-text-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__close {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-xs);
+    background: transparent;
+    color: var(--c-text-3);
+    cursor: pointer;
+    transition:
+      background var(--t-fast),
+      color var(--t-fast);
+
+    &:hover {
+      background: var(--c-surface-2);
+      color: var(--c-text);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--c-focus-ring);
+    }
+  }
+
+  &__divider {
+    flex-shrink: 0;
+    height: 1px;
+    background: var(--c-border);
+  }
+
+  &__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--s-6) var(--s-6) var(--s-8);
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-border-strong) transparent;
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-6);
+  }
+
+  &__section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    margin: 0;
+    font-size: var(--fs-12);
+    font-weight: var(--fw-semi);
+    color: var(--c-text-2);
+    letter-spacing: var(--ls-tight);
+  }
+
+  &__section-tag {
+    font-size: var(--fs-10);
+    font-weight: var(--fw-medium);
+    color: var(--c-text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px var(--s-3);
+    background: var(--c-surface-2);
+    border-radius: var(--r-sm);
+  }
+
+  &__form {
+    display: block;
+
+    // Formly nests <formly-form> > <formly-field> > <formly-group> > the real
+    // per-field <formly-field>s; all default to inline. Make the field
+    // containers flex columns so the fields get an even 16px gap; the gap only
+    // takes effect on the one with multiple children (the group), so applying
+    // it to both is harmless.
+    ::ng-deep formly-form,
+    ::ng-deep formly-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--s-8);
+    }
+
+    ::ng-deep formly-field {
+      display: block;
+    }
+  }
+}

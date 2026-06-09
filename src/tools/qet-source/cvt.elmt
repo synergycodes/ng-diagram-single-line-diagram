@@ -1,0 +1,19 @@
+<definition version="0.100.0" type="element" link_type="simple" width="24" height="80" hotspot_x="12" hotspot_y="44">
+    <names>
+        <name lang="en">Capacitor voltage transformer</name>
+    </names>
+    <informations>IEC 60617 capacitor voltage transformer (capacitive divider feeding inductive winding). Author: SLD Builder.</informations>
+    <description>
+        <line x1="0" y1="-44" x2="0" y2="-30" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <line x1="-8" y1="-30" x2="8" y2="-30" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <line x1="-8" y1="-26" x2="8" y2="-26" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <line x1="0" y1="-26" x2="0" y2="-18" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <line x1="-8" y1="-18" x2="8" y2="-18" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <line x1="-8" y1="-14" x2="8" y2="-14" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <line x1="0" y1="-14" x2="0" y2="-9" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <ellipse x="-9" y="-9" width="18" height="18" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <line x1="0" y1="9" x2="0" y2="36" end1="none" end2="none" length1="1.5" length2="1.5" style="line-style:normal;line-weight:normal;filling:none;color:black" antialias="false"/>
+        <terminal name="" x="0" y="-44" orientation="n" type="Generic"/>
+        <terminal name="" x="0" y="36" orientation="s" type="Generic"/>
+    </description>
+</definition>
