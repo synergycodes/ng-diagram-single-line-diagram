@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 /**
  * Root-level bridge so page-level chrome (the navbar Export button) can trigger
  * the SVG export that lives inside the diagram's DI scope. `SvgExportService`
- * depends on `ConnectivityService` (provided on `DiagramComponent`), so it
+ * depends on `JunctionsService` (provided on `DiagramComponent`), so it
  * can't be injected above the diagram — `DiagramComponent` registers the
  * handler on init and the navbar calls `export()`.
  */

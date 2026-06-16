@@ -1,0 +1,67 @@
+<div class="lib">
+  <header class="lib__head">
+    <h2 class="lib__title">Symbols</h2>
+    <button
+      type="button"
+      class="lib__collapse"
+      title="Hide library"
+      aria-label="Hide library"
+      (click)="collapse.emit()"
+    >
+      <app-icon name="collapse-library" [size]="18" />
+    </button>
+  </header>
+
+  <div class="lib__search">
+    <div class="lib__search-box">
+      <app-icon class="lib__search-icon" name="search" />
+      <input
+        class="lib__search-input"
+        type="search"
+        placeholder="Search symbols…"
+        [value]="query()"
+        (input)="onQueryChange($any($event.target).value)"
+        aria-label="Search symbols"
+      />
+    </div>
+  </div>
+
+  <div class="lib__body">
+    @for (group of groups(); track group.id) {
+      <section class="lib__group" [class.is-collapsed]="!isExpanded(group.id)">
+        <button
+          type="button"
+          class="lib__group-title"
+          [attr.aria-expanded]="isExpanded(group.id)"
+          (click)="toggleCategory(group.id)"
+        >
+          <span class="lib__group-label">{{ group.label }}</span>
+          <app-icon class="lib__group-chevron" name="chevron" />
+        </button>
+
+        @if (isExpanded(group.id)) {
+          <div class="lib__grid">
+            @for (entry of group.entries; track entry.id) {
+              <ng-diagram-palette-item [item]="entry.paletteItem">
+                <div class="lib__card" [title]="entry.label">
+                  <div class="lib__card-art" [innerHTML]="entry.svgHtml"></div>
+                  <div class="lib__card-label">{{ entry.label }}</div>
+                </div>
+                <ng-diagram-palette-item-preview>
+                  <div
+                    class="lib__preview"
+                    [style.width.px]="entry.previewSize.width"
+                    [style.height.px]="entry.previewSize.height"
+                    [innerHTML]="entry.svgHtml"
+                  ></div>
+                </ng-diagram-palette-item-preview>
+              </ng-diagram-palette-item>
+            }
+          </div>
+        }
+      </section>
+    } @empty {
+      <div class="lib__empty">No symbols match your search.</div>
+    }
+  </div>
+</div>

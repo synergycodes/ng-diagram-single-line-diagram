@@ -74,13 +74,13 @@ Common extension points:
   to `src/tools/symbols.config.mjs`, then run `npm run build:symbols`. Do not
   hand-edit the generated `src/app/sld/symbols/symbol-registry.generated.ts` or
   `src/assets/symbols/*.svg`.
-- **Add a node type.** See `src/app/sld/diagram/geometry/node-types.ts` for the
-  type constants and data contracts, and register the component in the template
-  map in `src/app/sld/diagram/canvas/diagram.component.ts`.
+- **Add a node type.** See `src/app/sld/diagram/core/geometry/node-types.ts` for
+  the type constants and data contracts, and register the component in the
+  template map in `src/app/sld/diagram/canvas/diagram.component.ts`.
 - **Add a properties-panel field type.** Register a new Formly type in
   `SldPageComponent.providers`, extend `PropertyType` in
   `src/app/sld/symbols/types.ts`, and extend the mapper in
-  `src/app/sld/properties-panel/formly/field-from-property-def.ts`.
+  `src/app/sld/components/properties-panel/formly/field-from-property-def.ts`.
 
 ## Symbol pipeline
 
@@ -97,8 +97,13 @@ logic. Run a single file with `npm test -- --include='**/path/to/file.spec.ts'`.
 
 ## Documentation
 
-- `CLAUDE.md`: in-depth architecture, conventions, and gotchas.
-- `docs/design-system.md`: design tokens and diagram language.
+Architecture and per-feature guides live next to the code:
+
+- `src/app/sld/diagram/README.md` — the diagram subsystem: `core/` vs
+  `features/`, how a feature registers with the canvas, and the extension-point
+  patterns (`ReshapeExtension`, `DroppedBranch`).
+- `src/app/sld/diagram/features/*/README.md` — one per feature.
+- `src/app/sld/shared/icons/README.md` — the icon system.
 
 ## License
 

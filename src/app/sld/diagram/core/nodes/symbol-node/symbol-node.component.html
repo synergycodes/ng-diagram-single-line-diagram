@@ -1,0 +1,75 @@
+<ng-diagram-node-resize-adornment
+  [class.has-resize-top]="resizeSides().has('top')"
+  [class.has-resize-right]="resizeSides().has('right')"
+  [class.has-resize-bottom]="resizeSides().has('bottom')"
+  [class.has-resize-left]="resizeSides().has('left')"
+>
+  <div class="sld-symbol">
+    <!-- Rotation wrapper. Holds body + leads in their UNROTATED frame, then
+         rotates the whole group around its (= bbox's) centre. -->
+    <div
+      class="sld-symbol__wrapper"
+      [style.left.px]="wrapperRect().left"
+      [style.top.px]="wrapperRect().top"
+      [style.width.px]="wrapperRect().width"
+      [style.height.px]="wrapperRect().height"
+      [style.transform]="wrapperTransform()"
+    >
+      <!-- Body artwork — fixed pixel size, centred in the wrapper. -->
+      <div
+        class="sld-symbol__body"
+        [style.left.px]="bodyRect().left"
+        [style.top.px]="bodyRect().top"
+        [style.width.px]="bodyRect().width"
+        [style.height.px]="bodyRect().height"
+        [innerHTML]="bodySvgHtml()"
+      ></div>
+
+      <!-- Lead stubs — dynamic per-render from terminals to body edges. -->
+      <svg
+        class="sld-symbol__leads"
+        [attr.width]="wrapperRect().width"
+        [attr.height]="wrapperRect().height"
+        [attr.viewBox]="'0 0 ' + wrapperRect().width + ' ' + wrapperRect().height"
+        fill="none"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        @for (lead of leads(); track lead.id) {
+          <line
+            [attr.x1]="lead.x1"
+            [attr.y1]="lead.y1"
+            [attr.x2]="lead.x2"
+            [attr.y2]="lead.y2"
+            [attr.stroke-width]="strokeWidth"
+            [attr.stroke-dasharray]="lead.kind === 'control' ? controlDasharray : null"
+            stroke-linecap="round"
+          />
+        }
+      </svg>
+    </div>
+
+    @if (tagLabel()) {
+      <span class="sld-symbol__tag" [class]="'sld-symbol__tag--' + tagSide()">{{
+        tagLabel()
+      }}</span>
+    }
+
+    <!-- Native ng-diagram ports — one per terminal. Rendered in the bbox frame
+         (not the rotation wrapper), so positions are bbox-relative % and the
+         rotation math has already been baked in by `terminalBboxPct`. Only in
+         linking mode; sketch mode leaves the canvas port-free. -->
+    @if (modeService.current().showsPorts) {
+      @for (port of ports(); track port.id) {
+        <ng-diagram-port
+          [id]="port.id"
+          type="both"
+          [side]="port.side"
+          [class]="'sld-symbol__port sld-symbol__port--' + port.kind"
+          [style.left.%]="port.xPct"
+          [style.top.%]="port.yPct"
+        />
+      }
+    }
+  </div>
+</ng-diagram-node-resize-adornment>

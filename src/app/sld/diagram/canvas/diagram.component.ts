@@ -6,14 +6,14 @@ import {
   effect,
   inject,
 } from '@angular/core';
-import { DiagramModeService } from '../mode/diagram-mode.service';
-import { DiagramStateStorageService } from '../mode/diagram-state-storage.service';
-import { NgDiagramActionsAdapter } from '../ng-diagram-bridge/ng-diagram-actions.adapter';
-import { SpatialBoundsRefresherService } from '../ng-diagram-bridge/spatial-bounds-refresher.service';
+import { DiagramModeService } from '../core/mode/diagram-mode.service';
+import { DiagramStateStorageService } from '../core/mode/diagram-state-storage.service';
+import { NgDiagramActionsAdapter } from '../core/ng-diagram-bridge/ng-diagram-actions.adapter';
+import { SpatialBoundsRefresherService } from '../core/ng-diagram-bridge/spatial-bounds-refresher.service';
 import { SvgExportService } from '../export/svg-export.service';
 import { SvgDownloadService } from '../export/svg-download.service';
 import { ExportBridgeService } from '../export/export-bridge.service';
-import { SchematicNameService } from '../../schematic-name.service';
+import { SchematicNameService } from '../../services/schematic-name.service';
 import {
   createMiddlewares,
   initializeModel,
@@ -22,11 +22,9 @@ import {
   NgDiagramEdgeTemplateMap,
   NgDiagramModelService,
   NgDiagramNodeTemplateMap,
-  NgDiagramSelectionService,
   NgDiagramService,
   type DiagramInitEvent,
   type EdgeDrawEndedEvent,
-  type Node,
   type NodeDragEndedEvent,
   type NodeResizeEndedEvent,
   type PaletteItemDroppedEvent,
@@ -34,37 +32,37 @@ import {
   type SelectionRemovedEvent,
 } from 'ng-diagram';
 import { SymbolRegistryService } from '../../symbols/symbol-registry.service';
-import { SldControlEdgeComponent } from '../edges/control-edge/control-edge.component';
-import { ConnectivityService } from '../connectivity/connectivity.service';
-import { DanglingEndpointsOverlayComponent } from '../connectivity/dangling-endpoints-overlay/dangling-endpoints-overlay.component';
-import { applyDeleteCleanup } from '../connectivity/delete-cleanup';
-import { JunctionOverlayComponent } from '../connectivity/junction-overlay/junction-overlay.component';
-import { EdgeReshapeOverlayComponent } from '../edge-reshape/edge-reshape-overlay/edge-reshape-overlay.component';
-import { JunctionTopologyService } from '../linking/junction-topology.service';
-import { LinkDropPreviewOverlayComponent } from '../link-drop-preview/link-drop-preview-overlay/link-drop-preview-overlay.component';
-import { RelinkOverlayComponent } from '../relink/relink-overlay/relink-overlay.component';
-import { GRID } from '../geometry/constants';
+import { SldControlEdgeComponent } from '../core/edges/control-edge/control-edge.component';
+import {
+  applyDeleteCleanup,
+  DanglingEndpointsOverlayComponent,
+  JunctionOverlayComponent,
+  provideJunctions,
+} from '../features/junctions';
+import { EdgeReshapeOverlayComponent } from '../features/edge-reshape';
+import { LinkDrawService, provideLinking } from '../features/linking';
+import { LinkDropPreviewOverlayComponent } from '../features/link-drop-preview';
+import { RelinkOverlayComponent } from '../features/relink';
+import { provideWireSnap, WireSnapController } from '../features/wire-snap';
+import { GRID } from '../core/geometry/constants';
 import {
   portKind,
   SLD_CONTROL_LINK_EDGE_TYPE,
   SLD_JUNCTION_NODE_TYPE,
   SLD_SYMBOL_NODE_TYPE,
   SLD_WIRE_NODE_TYPE,
-} from '../geometry/node-types';
-import { rotateSymbolPatch } from '../geometry/rotation';
-import { findWireSnap } from '../geometry/wire-snap';
-import { createAspectLockMiddleware } from '../middlewares/aspect-lock.middleware';
-import { createDragGroupMiddleware } from '../middlewares/drag-group.middleware';
-import { createJunctionPortRoutingMiddleware } from '../middlewares/junction-port-routing.middleware';
-import { SldJunctionNodeComponent } from '../nodes/junction-node/junction-node.component';
-import { SldSymbolNodeComponent } from '../nodes/symbol-node/symbol-node.component';
-import { SldWireNodeComponent } from '../nodes/wire-node/wire-node.component';
-import { applyEdgeStretchOnSelectionMoved } from '../routing/edge-stretch-on-move';
-import { ZoomToolbarComponent } from '../../zoom-toolbar/zoom-toolbar.component';
-import { buildDiagramConfig } from '../ng-diagram-bridge/diagram-config';
-import { buildMinimapNodeStyle } from '../ng-diagram-bridge/minimap-node-style';
-
-const SNAP_GUARD_RELEASE_MS = 50;
+} from '../core/geometry/node-types';
+import { DiagramKeyboardService } from '../core/keyboard/diagram-keyboard.service';
+import { createAspectLockMiddleware } from '../core/middlewares/aspect-lock.middleware';
+import { createDragGroupMiddleware } from '../core/middlewares/drag-group.middleware';
+import { createJunctionPortRoutingMiddleware } from '../core/middlewares/junction-port-routing.middleware';
+import { SldJunctionNodeComponent } from '../core/nodes/junction-node/junction-node.component';
+import { SldSymbolNodeComponent } from '../core/nodes/symbol-node/symbol-node.component';
+import { SldWireNodeComponent } from '../core/nodes/wire-node/wire-node.component';
+import { applyEdgeStretchOnSelectionMoved } from '../features/edge-routing';
+import { ZoomToolbarComponent } from '../../components/zoom-toolbar/zoom-toolbar.component';
+import { buildDiagramConfig } from '../core/ng-diagram-bridge/diagram-config';
+import { buildMinimapNodeStyle } from '../core/ng-diagram-bridge/minimap-node-style';
 
 @Component({
   selector: 'app-diagram',
@@ -80,10 +78,13 @@ const SNAP_GUARD_RELEASE_MS = 50;
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Provided here so they inherit the diagram subtree's ng-diagram services.
+  // Each feature exposes its own provider set; the rest is diagram-local infra.
   providers: [
-    ConnectivityService,
+    ...provideJunctions(),
+    ...provideLinking(),
+    ...provideWireSnap(),
+    DiagramKeyboardService,
     DiagramStateStorageService,
-    JunctionTopologyService,
     NgDiagramActionsAdapter,
     SpatialBoundsRefresherService,
     SvgExportService,
@@ -101,13 +102,15 @@ const SNAP_GUARD_RELEASE_MS = 50;
 export class DiagramComponent {
   private readonly modelService = inject(NgDiagramModelService);
   private readonly ngDiagramService = inject(NgDiagramService);
-  private readonly selectionService = inject(NgDiagramSelectionService);
   private readonly registry = inject(SymbolRegistryService);
   // protected — host-class binding reads it from template metadata.
   protected readonly modeService = inject(DiagramModeService);
   private readonly actions = inject(NgDiagramActionsAdapter);
-  private readonly topology = inject(JunctionTopologyService);
+  private readonly linkDraw = inject(LinkDrawService);
   private readonly spatialBounds = inject(SpatialBoundsRefresherService);
+  // Feature controllers — the canvas only forwards events to these.
+  private readonly wireSnap = inject(WireSnapController);
+  private readonly keyboard = inject(DiagramKeyboardService);
   // Eager-injected so its mode-change effect subscribes before the user
   // can toggle. Also gates `onSelectionRemoved` via `isSwapping()`.
   private readonly stateStorage = inject(DiagramStateStorageService);
@@ -123,9 +126,6 @@ export class DiagramComponent {
     if (!this.ngDiagramService.isInitialized()) return;
     this.ngDiagramService.invalidateMeasurements();
   });
-
-  // Guards against the snap-triggered selectionMoved cascade.
-  private isApplyingSnap = false;
 
   // Nodes the Alt-drag group middleware moved this tick (outside the
   // selection). Read by `onSelectionMoved` to scope the edge-stretch walk.
@@ -149,6 +149,7 @@ export class DiagramComponent {
     return portKind(node, portId ?? null, (id) => this.registry.getById(id));
   });
 
+  // Maps each SLD node type to the component ng-diagram renders for it.
   readonly nodeTemplateMap = new NgDiagramNodeTemplateMap([
     [SLD_SYMBOL_NODE_TYPE, SldSymbolNodeComponent],
     [SLD_WIRE_NODE_TYPE, SldWireNodeComponent],
@@ -160,6 +161,8 @@ export class DiagramComponent {
     [SLD_CONTROL_LINK_EDGE_TYPE, SldControlEdgeComponent],
   ]);
 
+  // Registers the SLD-specific middlewares on top of ng-diagram's defaults:
+  // aspect-lock on resize, Alt-drag group move, and junction port routing.
   readonly middlewares = createMiddlewares((defaults) => [
     ...defaults,
     createAspectLockMiddleware({
@@ -191,11 +194,14 @@ export class DiagramComponent {
     );
   }
 
+  // Wire-snap the freshly dropped node, then refresh spatial bounds (below).
   onPaletteItemDropped(event: PaletteItemDroppedEvent): void {
-    void this.trySnapNode(event.node);
+    this.wireSnap.trySnap(event.node);
     this.spatialBounds.refresh();
   }
 
+  // After any geometry change, rebuild the spatial index so hit tests (nearest
+  // port, edge-split) see the new positions.
   onNodeDragEnded(_event: NodeDragEndedEvent): void {
     this.spatialBounds.refresh();
   }
@@ -206,7 +212,7 @@ export class DiagramComponent {
 
   onSelectionMoved(event: SelectionMovedEvent): void {
     for (const node of event.nodes) {
-      void this.trySnapNode(node);
+      this.wireSnap.trySnap(node);
     }
     // Stretch only edges incident to a moved node: the selection itself, plus
     // the Alt-drag group (which the middleware moved outside the selection).
@@ -218,9 +224,11 @@ export class DiagramComponent {
     applyEdgeStretchOnSelectionMoved(this.modelService, movedNodeIds);
   }
 
+  // Resolve a freshly drawn edge's drop (port / junction / edge-split) via the
+  // linking feature — but only in a mode that permits new connections.
   onEdgeDrawEnded(event: EdgeDrawEndedEvent): void {
-    if (this.modeService.isLinking()) {
-      this.topology.handleEdgeDrawDrop(event);
+    if (this.modeService.current().allowsConnections) {
+      this.linkDraw.handleEdgeDrawDrop(event);
     }
   }
 
@@ -237,57 +245,10 @@ export class DiagramComponent {
     );
   }
 
-  // `R` rotates selected symbols 90° CW; `M` toggles mode. Skipped when typing.
+  // Keyboard shortcuts (rotate, mode toggle) — the canvas only registers the
+  // event; the key map lives in DiagramKeyboardService.
   @HostListener('document:keydown', ['$event'])
   protected onKeydown(event: KeyboardEvent): void {
-    const target = event.target as HTMLElement | null;
-    if (target && (target.matches('input, textarea, select') || target.isContentEditable)) {
-      return;
-    }
-
-    if (event.key === 'm' || event.key === 'M') {
-      if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
-      event.preventDefault();
-      this.modeService.toggle();
-      return;
-    }
-
-    if (event.key !== 'r' && event.key !== 'R') return;
-    const selectedSymbols = this.selectionService
-      .selection()
-      .nodes.filter((node: Node) => node.type === SLD_SYMBOL_NODE_TYPE);
-    if (selectedSymbols.length === 0) return;
-    event.preventDefault();
-    for (const node of selectedSymbols) {
-      const patch = rotateSymbolPatch(node);
-      if (patch) this.modelService.updateNode(node.id, patch);
-    }
-    this.spatialBounds.refresh();
-  }
-
-  private async trySnapNode(node: Node): Promise<void> {
-    if (this.isApplyingSnap) return;
-
-    // Alt-drag carries the connected component — snapping the anchor
-    // would leave the trailing group behind.
-    if (this.actions.isAltDragging()) return;
-
-    const snap = findWireSnap(node, this.modelService.nodes(), (id) => this.registry.getById(id));
-    if (!snap || (snap.delta.x === 0 && snap.delta.y === 0)) return;
-
-    this.isApplyingSnap = true;
-    try {
-      this.modelService.updateNode(node.id, {
-        position: {
-          x: node.position.x + snap.delta.x,
-          y: node.position.y + snap.delta.y,
-        },
-      });
-    } finally {
-      // Defer past the cascading `selectionMoved` from our own update.
-      setTimeout(() => {
-        this.isApplyingSnap = false;
-      }, SNAP_GUARD_RELEASE_MS);
-    }
+    this.keyboard.handleKeydown(event);
   }
 }

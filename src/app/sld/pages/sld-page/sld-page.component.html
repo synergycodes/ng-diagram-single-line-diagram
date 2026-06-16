@@ -1,0 +1,67 @@
+<!-- Full-bleed canvas; all chrome floats over it. -->
+<app-diagram class="sld-canvas" />
+
+<header class="navbar">
+  <div class="navbar__left">
+    <span class="navbar__logo" aria-hidden="true">
+      <app-icon name="logo" [size]="14" />
+    </span>
+    <span class="navbar__brand">SLD Builder</span>
+    <span class="navbar__divider" aria-hidden="true"></span>
+    @if (editingName()) {
+      <input
+        #nameInput
+        type="text"
+        class="navbar__doc-input"
+        [value]="schematicName.name()"
+        maxlength="80"
+        aria-label="Schematic name"
+        (keydown.enter)="nameInput.blur()"
+        (keydown.escape)="cancelNameEdit(nameInput)"
+        (blur)="commitName(nameInput.value)"
+      />
+    } @else {
+      <span
+        class="navbar__doc"
+        role="button"
+        tabindex="0"
+        title="Double-click to rename"
+        (dblclick)="startNameEdit()"
+        (keydown.enter)="startNameEdit()"
+        >{{ schematicName.name() }}</span
+      >
+    }
+  </div>
+
+  <div class="navbar__right">
+    <app-mode-toggle />
+    <app-theme-toggle />
+    <span class="navbar__divider" aria-hidden="true"></span>
+    <button
+      type="button"
+      class="navbar__export"
+      [disabled]="!exportReady()"
+      title="Export the diagram as an editable SVG"
+      (click)="exportSvg()"
+    >
+      <app-icon name="export" [size]="16" />
+      Export
+    </button>
+  </div>
+</header>
+
+@if (paletteOpen()) {
+  <app-symbol-library class="sld-palette" (collapse)="togglePalette()" />
+} @else {
+  <button
+    type="button"
+    class="palette-fab"
+    title="Show symbol library"
+    aria-label="Show symbol library"
+    (click)="togglePalette()"
+  >
+    <app-icon name="palette-grid" [size]="20" />
+  </button>
+}
+
+<app-properties-panel class="sld-props" />

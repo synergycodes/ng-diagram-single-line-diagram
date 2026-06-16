@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: var(--c-text);
+}
+
+.sld-wire {
+  &__line {
+    position: absolute;
+    background: currentColor;
+    pointer-events: none;
+
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    transform: translateY(-50%);
+
+    &--vertical {
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      right: auto;
+      width: 1.5px;
+      height: auto;
+      transform: translateX(-50%);
+    }
+  }
+}
+
+:host(.ng-diagram-node-selected) {
+  color: var(--c-brand-600);
+}
