@@ -24,6 +24,9 @@ import { CONTROL_DASHARRAY, STROKE_WIDTH } from '../../geometry/constants';
 import { leadLocal, terminalBboxPct, terminalEffectiveSide } from '../../geometry/symbol-geometry';
 import type { SldSymbolNodeData, SymbolOrientation } from '../../geometry/node-types';
 
+// Hover/selection box padding around the symbol body, in px.
+const SEL_BOX_PAD_PX = 12;
+
 // A drawn lead line (body edge -> terminal) in wrapper-local SVG coordinates.
 interface LeadGeometry {
   readonly id: string;
@@ -82,13 +85,14 @@ export class SldSymbolNodeComponent implements NgDiagramNodeTemplate<SldSymbolNo
     equal: (a, b) => a.width === b.width && a.height === b.height,
   });
 
-  // Side of the square hover/selection box (CSS `--sel-box-side`): the larger
-  // bbox dimension + padding, so the box is always a consistent square that
-  // tracks the symbol's size. Rotation-invariant (max of w/h).
+  // Square hover/selection box (`--sel-box-side`), sized to the symbol's DEFAULT
+  // (display) size, not the live bbox — so a lead-stretch resize (which grows
+  // only the bbox) no longer balloons it. Rotation-invariant (max of w/h).
   protected readonly selectionBoxSide = computed(() => {
-    const { width, height } = this.bbox();
-    const side = Math.max(width, height);
-    return side > 0 ? `${side + 12}px` : '100%';
+    const symbol = this.symbol();
+    if (!symbol) return '100%';
+    const side = Math.max(symbol.displaySize.width, symbol.displaySize.height);
+    return side > 0 ? `${side + SEL_BOX_PAD_PX}px` : '100%';
   });
 
   protected readonly orientation = computed<SymbolOrientation>(

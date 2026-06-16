@@ -1,5 +1,6 @@
 import type { Edge, NgDiagramModelService, NgDiagramService, Point } from 'ng-diagram';
 import { POSITION_TOLERANCE_PX } from '../../../core/geometry/constants';
+import { collapseCollinearBends, dropSameAxisBends } from '../../../core/geometry/edge-stretch';
 import { mintLinkId } from '../../../core/geometry/id-factory';
 import {
   edgeKind,
@@ -65,8 +66,13 @@ function mergeHalves(
   ngDiagramService.transaction(() => {
     modelService.deleteEdges([firstHalf.id, secondHalf.id]);
     modelService.deleteNodes([junctionId]);
-    const mergedPoints =
-      srcWorld && tgtWorld ? minimalOrthogonalPath(srcWorld, tgtWorld) : undefined;
+    const mergedPoints = composeMergedPolyline(
+      firstHalf,
+      secondHalf,
+      junctionId,
+      srcWorld,
+      tgtWorld,
+    );
     modelService.addEdges([
       {
         ...(kind === 'control' ? { type: SLD_CONTROL_LINK_EDGE_TYPE } : {}),
@@ -112,4 +118,43 @@ function minimalOrthogonalPath(src: Point, tgt: Point): Point[] {
     { x: src.x, y: tgt.y },
     { x: tgt.x, y: tgt.y },
   ];
+}
+
+// Stitch the two halves into one polyline so the merged edge keeps the parent's
+// pre-split path: concatenate their points (far → junction → far), re-anchor the
+// ends to the live ports, fold the junction seam. A reshaped bend survives (real
+// corner, not seam). Falls back to a minimal path when a half has no polyline.
+function composeMergedPolyline(
+  firstHalf: Edge,
+  secondHalf: Edge,
+  junctionId: string,
+  srcWorld: Point | null,
+  tgtWorld: Point | null,
+): Point[] | undefined {
+  const firstPts = orientHalf(firstHalf, junctionId, 'far-to-junction');
+  const secondPts = orientHalf(secondHalf, junctionId, 'junction-to-far');
+  if (firstPts && secondPts) {
+    const stitched = [...firstPts, ...secondPts];
+    if (srcWorld) stitched[0] = { x: srcWorld.x, y: srcWorld.y };
+    if (tgtWorld) stitched[stitched.length - 1] = { x: tgtWorld.x, y: tgtWorld.y };
+    const folded = dropSameAxisBends(collapseCollinearBends(stitched));
+    if (folded.length >= 2) return folded;
+  }
+  return srcWorld && tgtWorld ? minimalOrthogonalPath(srcWorld, tgtWorld) : undefined;
+}
+
+// A half's points, copied and ordered relative to the junction end (reversed
+// when needed) so it reads far→junction or junction→far. Null when the half has
+// no polyline.
+function orientHalf(
+  half: Edge,
+  junctionId: string,
+  order: 'far-to-junction' | 'junction-to-far',
+): Point[] | null {
+  if (!half.points || half.points.length < 2) return null;
+  const pts = half.points.map((p) => ({ x: p.x, y: p.y }));
+  const junctionAtStart = half.source === junctionId;
+  const wantJunctionLast = order === 'far-to-junction';
+  // Reverse only when the junction isn't already where this order wants it.
+  return junctionAtStart === wantJunctionLast ? pts.reverse() : pts;
 }

@@ -7,9 +7,10 @@
   font-family: var(--font-mono);
 }
 
-// Hover / selection backdrop — a fixed square box centred on the node,
-// side = max(bbox w/h) + padding (`--sel-box-side`, set by the component).
-// Painted by ::before so it sits under the body/leads/tag.
+// Hover / selection backdrop — a fixed square box centred on the node, side =
+// the symbol's default (display) size + padding (`--sel-box-side`, set by the
+// component), so it stays constant as leads stretch. Painted by ::before so it
+// sits under the body/leads/tag.
 :host::before {
   content: '';
   position: absolute;

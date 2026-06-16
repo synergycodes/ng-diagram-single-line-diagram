@@ -2,7 +2,12 @@
 // Prevents two branches from leaving the junction collinear (overlap).
 
 import type { Edge, Point } from 'ng-diagram';
-import { SLD_JUNCTION_PORT_IDS, type SldJunctionPortId, type SldLinkEdgeData } from './node-types';
+import {
+  pickJunctionPortId,
+  SLD_JUNCTION_PORT_IDS,
+  type SldJunctionPortId,
+  type SldLinkEdgeData,
+} from './node-types';
 
 export interface BranchEndpoint {
   readonly edgeId: string;
@@ -68,9 +73,11 @@ export interface BranchPortAssignment {
   readonly port: SldJunctionPortId;
 }
 
-// Minimal port-change diff: non-parent-half branches on an overcrowded
-// port move to a perpendicular port. Skips when both cross-axis ports
-// are busy. Idempotent.
+// Minimal port-change diff over two passes (then diffed vs. input): (1) decongest
+// overcrowded ports — extra non-parent-half branches jump to a free perpendicular
+// port; (2) redirect a lone branch whose far end no longer faces its port (its
+// node moved across the segment) to the port facing that end, if free. Parent
+// halves never move (they define the through-line). Idempotent.
 export function reassignJunctionBranches(
   junctionCentre: { x: number; y: number },
   branches: readonly BranchEndpoint[],
@@ -81,9 +88,11 @@ export function reassignJunctionBranches(
     [SLD_JUNCTION_PORT_IDS.bottom]: 0,
     [SLD_JUNCTION_PORT_IDS.left]: 0,
   };
-  for (const b of branches) portCounts[b.currentPort]++;
+  // Working port per branch, seeded from its current port and mutated in place
+  // by both passes; the change list is the final diff vs. `currentPort`.
+  const assigned: SldJunctionPortId[] = branches.map((b) => b.currentPort);
+  for (const port of assigned) portCounts[port]++;
 
-  const changes: BranchPortAssignment[] = [];
   const allPorts: readonly SldJunctionPortId[] = [
     SLD_JUNCTION_PORT_IDS.top,
     SLD_JUNCTION_PORT_IDS.right,
@@ -91,28 +100,49 @@ export function reassignJunctionBranches(
     SLD_JUNCTION_PORT_IDS.left,
   ];
 
+  // PASS 1 — decongest overcrowded ports.
   for (const port of allPorts) {
     if (portCounts[port] <= 1) continue;
 
-    const onPort = branches.filter((b) => b.currentPort === port);
-    const movable = onPort.filter((b) => b.formerParentId === undefined);
+    const onPort = branches.map((_, i) => i).filter((i) => assigned[i] === port);
+    const movable = onPort.filter((i) => branches[i].formerParentId === undefined);
     if (movable.length === 0) continue;
 
     const hasParentHalf = onPort.length > movable.length;
     const toReassign = hasParentHalf ? movable : movable.slice(1);
 
-    for (const branch of toReassign) {
-      const primary = pickCrossAxisPort(port, junctionCentre, branch.otherEndWorld);
+    for (const i of toReassign) {
+      const primary = pickCrossAxisPort(port, junctionCentre, branches[i].otherEndWorld);
       const alt = oppositePort(primary);
       const target = portCounts[primary] === 0 ? primary : portCounts[alt] === 0 ? alt : null;
       if (target === null) continue;
 
       portCounts[port]--;
       portCounts[target]++;
-      changes.push({ edgeId: branch.edgeId, side: branch.side, port: target });
+      assigned[i] = target;
     }
   }
 
+  // PASS 2 — redirect a lone movable branch onto the port facing its far end.
+  // Only when it's alone (decongestion owns crowded ports) and that port is free
+  // (never displace another branch or a parent half).
+  for (let i = 0; i < branches.length; i++) {
+    if (branches[i].formerParentId !== undefined) continue;
+    const current = assigned[i];
+    if (portCounts[current] !== 1) continue;
+    const desired = pickJunctionPortId(junctionCentre, branches[i].otherEndWorld);
+    if (desired === current || portCounts[desired] !== 0) continue;
+    portCounts[current]--;
+    portCounts[desired]++;
+    assigned[i] = desired;
+  }
+
+  const changes: BranchPortAssignment[] = [];
+  for (let i = 0; i < branches.length; i++) {
+    if (assigned[i] !== branches[i].currentPort) {
+      changes.push({ edgeId: branches[i].edgeId, side: branches[i].side, port: assigned[i] });
+    }
+  }
   return changes;
 }
 

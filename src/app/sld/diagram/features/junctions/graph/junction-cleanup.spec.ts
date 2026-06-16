@@ -84,6 +84,8 @@ interface EdgeOverrides {
   readonly sourcePosition?: { x: number; y: number };
   readonly targetPosition?: { x: number; y: number };
   readonly data?: SldLinkEdgeData;
+  readonly routingMode?: 'auto' | 'manual';
+  readonly points?: { x: number; y: number }[];
 }
 
 function makeEdge(id: string, overrides: EdgeOverrides = {}): Edge {
@@ -205,6 +207,103 @@ describe('reconcileJunction', () => {
       expect(merged.target).toBe('sym-right');
       expect(merged.targetPort).toBe('p-left');
       expect(merged.id).toMatch(/^sld-link-/);
+    });
+
+    it('preserves the combined polyline of the two halves instead of resetting it', () => {
+      // A straight vertical parent was split at the junction. Deleting the dot
+      // must give back the SAME straight line (folding the 8px seam), not a
+      // freshly minimised path that loses the original geometry.
+      const model = new FakeModelService();
+      const ng = new FakeNgDiagramService();
+      const j = makeJunction();
+      model.nodes.set(j.id, j);
+      const data: SldLinkEdgeData = { formerParentId: FORMER_PARENT };
+      // Half A ends at the junction top port; Half B starts at the bottom port.
+      model.edges.set(
+        'eA',
+        makeEdge('eA', {
+          source: 'sym-top',
+          sourcePort: 'p-bottom',
+          target: j.id,
+          targetPort: 'p-top',
+          routingMode: 'manual',
+          points: [
+            { x: 104, y: 40 },
+            { x: 104, y: 100 },
+          ],
+          data,
+        }),
+      );
+      model.edges.set(
+        'eB',
+        makeEdge('eB', {
+          source: j.id,
+          sourcePort: 'p-bottom',
+          target: 'sym-bottom',
+          targetPort: 'p-top',
+          routingMode: 'manual',
+          points: [
+            { x: 104, y: 108 },
+            { x: 104, y: 200 },
+          ],
+          data,
+        }),
+      );
+
+      reconcileJunction(model.asReal(), ng.asReal(), j.id);
+
+      const merged = Array.from(model.edges.values())[0];
+      expect(merged.routingMode).toBe('manual');
+      // Seam folded: one straight segment spanning both halves' far ends.
+      expect(merged.points).toEqual([
+        { x: 104, y: 40 },
+        { x: 104, y: 200 },
+      ]);
+    });
+
+    it('keeps a genuine corner when one half was reshaped into an L', () => {
+      // Half A runs vertically into the junction; Half B leaves horizontally.
+      // The junction bend is a real corner (not a collinear seam) and survives.
+      const model = new FakeModelService();
+      const ng = new FakeNgDiagramService();
+      const j = makeJunction();
+      model.nodes.set(j.id, j);
+      const data: SldLinkEdgeData = { formerParentId: FORMER_PARENT };
+      model.edges.set(
+        'eA',
+        makeEdge('eA', {
+          source: 'sym-top',
+          target: j.id,
+          routingMode: 'manual',
+          points: [
+            { x: 104, y: 40 },
+            { x: 104, y: 104 },
+          ],
+          data,
+        }),
+      );
+      model.edges.set(
+        'eB',
+        makeEdge('eB', {
+          source: j.id,
+          target: 'sym-right',
+          routingMode: 'manual',
+          points: [
+            { x: 104, y: 104 },
+            { x: 200, y: 104 },
+          ],
+          data,
+        }),
+      );
+
+      reconcileJunction(model.asReal(), ng.asReal(), j.id);
+
+      const merged = Array.from(model.edges.values())[0];
+      expect(merged.points).toEqual([
+        { x: 104, y: 40 },
+        { x: 104, y: 104 },
+        { x: 200, y: 104 },
+      ]);
     });
 
     it('collapses 2 branches with no formerParentId — the relink-disconnect case', () => {

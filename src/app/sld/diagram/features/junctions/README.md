@@ -7,7 +7,8 @@ The junction graph — the dots where 3+ wire/edge ends meet.
 - **Resolves** where a dropped link endpoint attaches to the graph — reuse a
   junction, merge a loose end, or split an edge (`junction-attachment.service.ts`
   + `graph/junction-geometry.ts`).
-- **Maintains** them: merge/remove redundant ones after edits
+- **Maintains** them: merge/remove redundant ones after edits — a 2-branch
+  passthrough collapses back into one edge that keeps the combined polyline
   (`graph/junction-cleanup.ts`, `graph/delete-cleanup.ts`).
 - **Renders** them and loose ends (`overlays/`).
 - **Teaches** edge-reshape to drag a junction along with a segment

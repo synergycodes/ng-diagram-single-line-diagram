@@ -51,8 +51,10 @@ export function buildDiagramConfig(deps: {
     edgeRouting: {
       defaultRouting: 'orthogonal',
       orthogonal: {
-        // Zero so edges meeting at a junction port don't get a forced "{" detour.
-        firstLastSegmentLength: 0,
+        // from/toEndSegmentLength: auto edges leave a port with a short
+        // perpendicular stub before turning (a bottom port exits down, not
+        // sideways). Junction-incident links opt out via SLD_LINK_NOSTUB_ROUTING.
+        firstLastSegmentLength: GRID * 2,
         // SLD convention is sharp 90° corners — no fillet rounding.
         maxCornerRadius: 0,
       },

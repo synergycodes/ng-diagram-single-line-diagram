@@ -144,6 +144,40 @@ describe('reassignJunctionBranches', () => {
     ];
     expect(reassignJunctionBranches(CENTRE, branches)).toEqual([]);
   });
+
+  it('redirects a lone branch onto the port facing its far end after the node moved across the segment', () => {
+    // Vertical parent → halves on top/bottom. The tee'd branch sits on `right`
+    // (its node used to be to the right), but the node was dragged to the LEFT
+    // of the segment. It must hop to `left` so it stops leaving the wrong way.
+    const branches = [
+      branch({ id: 'half-a', port: PORT.top, other: { x: 100, y: 0 }, formerParentId: 'fp1' }),
+      branch({ id: 'half-b', port: PORT.bottom, other: { x: 100, y: 200 }, formerParentId: 'fp1' }),
+      branch({ id: 'branch', port: PORT.right, other: { x: 0, y: 100 } }),
+    ];
+    expect(reassignJunctionBranches(CENTRE, branches)).toEqual([
+      { edgeId: 'branch', side: 'target', port: PORT.left },
+    ]);
+  });
+
+  it('leaves a lone branch put when the port facing its far end is occupied', () => {
+    // Horizontal parent → halves on left/right. A branch on `top` faces RIGHT,
+    // but `right` is a parent half → no free facing port, so it stays.
+    const branches = [
+      branch({ id: 'half-a', port: PORT.left, other: { x: 0, y: 100 }, formerParentId: 'fp1' }),
+      branch({ id: 'half-b', port: PORT.right, other: { x: 200, y: 100 }, formerParentId: 'fp1' }),
+      branch({ id: 'branch', port: PORT.top, other: { x: 300, y: 100 } }),
+    ];
+    expect(reassignJunctionBranches(CENTRE, branches)).toEqual([]);
+  });
+
+  it('is idempotent after a redirect: a branch already facing its far end stays put', () => {
+    const branches = [
+      branch({ id: 'half-a', port: PORT.top, other: { x: 100, y: 0 }, formerParentId: 'fp1' }),
+      branch({ id: 'half-b', port: PORT.bottom, other: { x: 100, y: 200 }, formerParentId: 'fp1' }),
+      branch({ id: 'branch', port: PORT.left, other: { x: 0, y: 100 } }),
+    ];
+    expect(reassignJunctionBranches(CENTRE, branches)).toEqual([]);
+  });
 });
 
 const FAR_END = { x: 5, y: 5 };

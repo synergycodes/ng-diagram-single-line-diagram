@@ -11,6 +11,11 @@ export const SLD_WIRE_NODE_TYPE = 'sld-wire';
 // Custom edge type for control (dashed) links. Power leaves `type` undefined.
 export const SLD_CONTROL_LINK_EDGE_TYPE = 'sld-control-link';
 
+// Routing name for junction-incident links: orthogonal with the end stub
+// (from/toEndSegmentLength) zeroed — a junction is a meeting point, not a
+// terminal, so an exit nub there reads as the branch shifted off the dot.
+export const SLD_LINK_NOSTUB_ROUTING = 'sld-orthogonal-nostub';
+
 // Edge `type` for a link of the given kind: control links carry the custom
 // dashed edge type; power links leave `type` undefined (ng-diagram default).
 // A partial spread onto an edge so callers don't repeat the kind check.
