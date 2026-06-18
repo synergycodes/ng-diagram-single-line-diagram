@@ -1,0 +1,251 @@
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject } from '@angular/core';
+import {
+  NgDiagramModelService,
+  NgDiagramSelectionService,
+  NgDiagramService,
+  NgDiagramViewportService,
+  type Edge,
+  type Point,
+} from 'ng-diagram';
+import { JunctionAttachmentService, reconcileJunction } from '../../../junctions';
+import { findEdgeSplitHit, type EdgeSplitHit } from '../../../../core/geometry/edge-split';
+import { RelinkGestureService } from '../../relink-gesture.service';
+import { GRID, PORT_SNAP_PX } from '../../../../core/geometry/constants';
+import { endpointWorldPosition } from '../../../../core/geometry/port-position';
+import {
+  edgeKind,
+  portKind,
+  SLD_JUNCTION_NODE_TYPE,
+  SLD_JUNCTION_SIZE_PX,
+  pickJunctionPortId,
+  type LinkKind,
+} from '../../../../core/geometry/node-types';
+import { SymbolRegistryService } from '../../../../../symbols/symbol-registry.service';
+import { RelinkBranch } from '../../relink-branch';
+import { PointerDragController } from '../../../../core/ng-diagram-bridge/pointer-drag-controller';
+
+interface RelinkHandle {
+  readonly edgeId: string;
+  readonly side: 'source' | 'target';
+  readonly position: Point;
+}
+
+interface DragState {
+  readonly edgeId: string;
+  readonly side: 'source' | 'target';
+  readonly initialPosition: Point;
+  readonly initialClientX: number;
+  readonly initialClientY: number;
+  // Node we left at drag start — reconciled on release.
+  readonly originalNodeId: string;
+}
+
+// Renders a grip on each end of a selected edge and serves the relink gesture:
+// drag an endpoint to a new target. Live-previews the attachment during the drag
+// and, on drop, resolves through the same priority as a fresh link-draw —
+// port (PORT_SNAP_PX) → junction → edge-hit (dangling falls out of the live
+// preview) — delegating the actual topology edits to the junctions feature
+// (JunctionAttachmentService).
+@Component({
+  selector: 'app-relink-overlay',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './relink-overlay.component.html',
+  styleUrl: './relink-overlay.component.scss',
+})
+export class RelinkOverlayComponent {
+  private readonly modelService = inject(NgDiagramModelService);
+  private readonly ngDiagramService = inject(NgDiagramService);
+  private readonly selectionService = inject(NgDiagramSelectionService);
+  private readonly viewportService = inject(NgDiagramViewportService);
+  private readonly relinkGesture = inject(RelinkGestureService);
+  private readonly attachment = inject(JunctionAttachmentService);
+  private readonly registry = inject(SymbolRegistryService);
+
+  // Document-bound + frame-coalesced: the handle's `@for` can re-render mid-drag
+  // during a routing cascade, so listeners can't live on the handle element.
+  private readonly drag = new PointerDragController<DragState>(
+    {
+      onMove: (event, state) => this.applyPointerMove(event, state),
+      onEnd: (event, state) => void this.resolveDrop(event, state),
+      onTeardown: () => this.relinkGesture.setActive(false),
+    },
+    { listenerTarget: 'document', coalesce: true },
+  );
+
+  protected readonly handles = computed<readonly RelinkHandle[]>(() => {
+    const selection = this.selectionService.selection();
+    const result: RelinkHandle[] = [];
+    for (const edge of selection.edges) {
+      const edgePoints = edge.points;
+      if (!edgePoints || edgePoints.length < 1) continue;
+      // First/last routed points work for both connected and dangling ends.
+      result.push({ edgeId: edge.id, side: 'source', position: edgePoints[0] });
+      result.push({ edgeId: edge.id, side: 'target', position: edgePoints[edgePoints.length - 1] });
+    }
+    return result;
+  });
+
+  protected readonly transform = computed(() => {
+    const viewport = this.viewportService.viewport();
+    return `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.scale})`;
+  });
+
+  constructor() {
+    // Tear down an in-flight gesture if the overlay is destroyed mid-drag
+    // (selection change, route teardown) so the document listeners don't leak
+    // and keep mutating the model from a dead instance.
+    const destroyRef = inject(DestroyRef);
+    destroyRef.onDestroy(() => this.drag.teardown());
+  }
+
+  protected onPointerDown(event: PointerEvent, handle: RelinkHandle): void {
+    event.stopPropagation();
+    event.preventDefault();
+    const edge = this.modelService.getEdgeById(handle.edgeId);
+    if (!edge) return;
+    const handleEl = event.currentTarget as HTMLElement;
+    this.relinkGesture.setActive(true);
+    this.relinkGesture.setSourceKind(edgeKind(edge));
+    this.drag.begin(event, handleEl, {
+      edgeId: handle.edgeId,
+      side: handle.side,
+      initialPosition: { x: handle.position.x, y: handle.position.y },
+      initialClientX: event.clientX,
+      initialClientY: event.clientY,
+      originalNodeId: handle.side === 'source' ? edge.source : edge.target,
+    });
+  }
+
+  private applyPointerMove(event: PointerEvent, drag: DragState): void {
+    const snappedWorld = this.snappedWorldPosition(drag, event);
+
+    // Live preview: attach to a nearby port so the routed shape shows
+    // the snap. Committed for real in `resolveDrop`.
+    const port = this.modelService.getNearestPortInRange(snappedWorld, PORT_SNAP_PX);
+    if (port && this.isPortAcceptable(drag, port.nodeId, port.id)) {
+      const portId = this.directionalPortId(drag, port.nodeId, port.id);
+      this.modelService.updateEdge(
+        drag.edgeId,
+        this.connectedPatch(drag.side, port.nodeId, portId),
+      );
+      return;
+    }
+
+    this.modelService.updateEdge(drag.edgeId, this.danglingPatch(drag.side, snappedWorld));
+  }
+
+  private async resolveDrop(event: PointerEvent, drag: DragState): Promise<void> {
+    event.stopPropagation();
+
+    const dropWorld = this.snappedWorldPosition(drag, event);
+    const dragKind = this.dragKind(drag);
+    // Relink commits by updating the existing edge in place; the attachment
+    // service resolves the target identically to a fresh draw. Each resolution
+    // runs in a transaction that waits for measurements, so the reconcile below
+    // reads the settled graph instead of relying on a deferral.
+    const branch = new RelinkBranch(this.modelService, dragKind, drag.edgeId, drag.side);
+    const port = this.modelService.getNearestPortInRange(dropWorld, PORT_SNAP_PX);
+    if (port && this.isPortAcceptable(drag, port.nodeId, port.id)) {
+      const portId = this.directionalPortId(drag, port.nodeId, port.id);
+      await this.ngDiagramService.transaction(
+        () =>
+          this.modelService.updateEdge(
+            drag.edgeId,
+            this.connectedPatch(drag.side, port.nodeId, portId),
+          ),
+        { waitForMeasurements: true },
+      );
+    } else {
+      const nearJunction = this.attachment.findNearbyJunction(
+        dropWorld,
+        SLD_JUNCTION_SIZE_PX,
+        dragKind,
+      );
+      if (nearJunction && this.isPortAcceptable(drag, nearJunction.id, null)) {
+        await this.attachment.attachToJunction(branch, nearJunction);
+      } else {
+        const hit = this.findEdgeHit(drag.edgeId, dropWorld, dragKind);
+        if (hit) await this.attachment.splitEdgeAtHit(branch, hit);
+      }
+    }
+
+    // The just-left junction may now be redundant (2-way → merge, 1-way →
+    // remove). The resolution above has committed and measured, so this reads
+    // the settled graph.
+    reconcileJunction(this.modelService, this.ngDiagramService, drag.originalNodeId);
+  }
+
+  private findEdgeHit(relinkedEdgeId: string, drop: Point, kind: LinkKind): EdgeSplitHit | null {
+    const others = this.modelService
+      .edges()
+      .filter((edge) => edge.id !== relinkedEdgeId && edgeKind(edge) === kind);
+    return findEdgeSplitHit(others, drop, GRID, GRID);
+  }
+
+  private dragKind(drag: DragState): LinkKind {
+    const edge = this.modelService.getEdgeById(drag.edgeId);
+    return edge ? edgeKind(edge) : 'power';
+  }
+
+  // For junction targets, override the arbitrary nearest-port pick with
+  // the side facing the edge's other end.
+  private directionalPortId(drag: DragState, targetNodeId: string, defaultPortId: string): string {
+    const node = this.modelService.getNodeById(targetNodeId);
+    if (!node || node.type !== SLD_JUNCTION_NODE_TYPE) return defaultPortId;
+    const edge = this.modelService.getEdgeById(drag.edgeId);
+    if (!edge) return defaultPortId;
+    const size = node.size ?? { width: 0, height: 0 };
+    const centre = {
+      x: node.position.x + size.width / 2,
+      y: node.position.y + size.height / 2,
+    };
+    const otherNodeId = drag.side === 'target' ? edge.source : edge.target;
+    const otherPosition = drag.side === 'target' ? edge.sourcePosition : edge.targetPosition;
+    const otherWorld = endpointWorldPosition(this.modelService, otherNodeId, otherPosition);
+    if (!otherWorld) return defaultPortId;
+    return pickJunctionPortId(centre, otherWorld);
+  }
+
+  private snappedWorldPosition(drag: DragState, event: PointerEvent): Point {
+    const scale = this.viewportService.scale() || 1;
+    const dxWorld = (event.clientX - drag.initialClientX) / scale;
+    const dyWorld = (event.clientY - drag.initialClientY) / scale;
+    return {
+      x: Math.round((drag.initialPosition.x + dxWorld) / GRID) * GRID,
+      y: Math.round((drag.initialPosition.y + dyWorld) / GRID) * GRID,
+    };
+  }
+
+  // Self-loop + kind guard. `candidatePortId === null` skips the kind
+  // check (junction-snap path resolves the port later).
+  private isPortAcceptable(
+    drag: DragState,
+    candidateNodeId: string,
+    candidatePortId: string | null,
+  ): boolean {
+    const edge = this.modelService.getEdgeById(drag.edgeId);
+    if (!edge) return false;
+    const otherEnd = drag.side === 'target' ? edge.source : edge.target;
+    if (otherEnd === candidateNodeId) return false;
+    const dragKind = edgeKind(edge);
+    const candidateKind = portKind(
+      this.modelService.getNodeById(candidateNodeId),
+      candidatePortId,
+      (id) => this.registry.getById(id),
+    );
+    return candidateKind === null || candidateKind === dragKind;
+  }
+
+  private danglingPatch(side: 'source' | 'target', position: Point): Partial<Edge> {
+    // Force 'auto' — manual `points[]` would freeze the handle in place.
+    return side === 'target'
+      ? { target: '', targetPort: undefined, targetPosition: position, routingMode: 'auto' }
+      : { source: '', sourcePort: undefined, sourcePosition: position, routingMode: 'auto' };
+  }
+
+  private connectedPatch(side: 'source' | 'target', nodeId: string, portId: string): Partial<Edge> {
+    return side === 'target'
+      ? { target: nodeId, targetPort: portId, targetPosition: undefined, routingMode: 'auto' }
+      : { source: nodeId, sourcePort: portId, sourcePosition: undefined, routingMode: 'auto' };
+  }
+}

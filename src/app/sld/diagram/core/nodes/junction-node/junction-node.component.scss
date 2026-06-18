@@ -1,0 +1,117 @@
+:host {
+  display: block;
+  // Anchor for absolutely-positioned ports — without it ng-diagram measures the port off-centre.
+  position: relative;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.sld-junction__port {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  // 1×1 routing anchor whose side-direction edge sits on the junction centre.
+  // See symbol-node.component.scss for the same geometry rationale.
+  --ngd-port-size: 1px;
+  --ngd-port-border-size: 0;
+  --ngd-port-background-color: transparent;
+  --ngd-port-background-color-hover: transparent;
+  --ngd-port-border-color-hover: transparent;
+  pointer-events: auto;
+
+  &.top {
+    transform: translate(-50%, 0%);
+  }
+  &.bottom {
+    transform: translate(-50%, -100%);
+  }
+  &.left {
+    transform: translate(0%, -50%);
+  }
+  &.right {
+    transform: translate(-100%, -50%);
+  }
+}
+
+// Shares --port-hit-size with symbol-node so hitboxes match.
+.sld-junction__port::before {
+  content: '';
+  position: absolute;
+  width: var(--port-hit-size);
+  height: var(--port-hit-size);
+  border-radius: 50%;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.sld-junction__port.top::before {
+  top: 0;
+  left: 50%;
+}
+.sld-junction__port.bottom::before {
+  top: 100%;
+  left: 50%;
+}
+.sld-junction__port.left::before {
+  top: 50%;
+  left: 0;
+}
+.sld-junction__port.right::before {
+  top: 50%;
+  left: 100%;
+}
+
+.sld-junction__port::after {
+  content: '';
+  position: absolute;
+  width: var(--handle-dot-size);
+  height: var(--handle-dot-size);
+  border-radius: 50%;
+  background: var(--c-surface);
+  border: var(--handle-dot-border) solid var(--c-brand-500);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity var(--t-fast);
+  pointer-events: none;
+}
+
+.sld-junction__port.top::after {
+  top: 0;
+  left: 50%;
+}
+.sld-junction__port.bottom::after {
+  top: 100%;
+  left: 50%;
+}
+.sld-junction__port.left::after {
+  top: 50%;
+  left: 0;
+}
+.sld-junction__port.right::after {
+  top: 50%;
+  left: 100%;
+}
+
+// Control junction inherits the kind's accent, matching the square amber port
+// dots on symbols.
+:host(.kind-control) .sld-junction__port::after {
+  border-color: var(--c-control);
+}
+
+:host-context(app-diagram.is-linking-gesture) .sld-junction__port::after {
+  opacity: 1;
+}
+
+// Cross-kind junction hides its hit area + dot during a typed gesture so the
+// cursor doesn't snap onto an incompatible junction.
+:host-context(app-diagram.is-linking-power):host(.kind-control) .sld-junction__port::before,
+:host-context(app-diagram.is-linking-control):host(.kind-power) .sld-junction__port::before {
+  pointer-events: none;
+}
+
+:host-context(app-diagram.is-linking-power):host(.kind-control) .sld-junction__port::after,
+:host-context(app-diagram.is-linking-control):host(.kind-power) .sld-junction__port::after {
+  opacity: 0;
+}

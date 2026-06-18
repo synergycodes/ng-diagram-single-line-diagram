@@ -7,8 +7,8 @@ HV transmission work (>=110 kV): switchgear, transformers, instrument
 transformers, and compensation.
 
 It doubles as a reference template for building a domain-specific node editor on
-ng-diagram: a custom node/edge model, a generated symbol pipeline, derived
-connectivity, and a schema-driven properties panel.
+ng-diagram: a custom node/edge model, a generated symbol pipeline,
+geometry-derived junctions, and a schema-driven properties panel.
 
 ## Quick start
 
@@ -37,34 +37,38 @@ The app is a single standalone-component Angular app. The route `''` lazy-loads
 that page, not at the bootstrap root, because ng-diagram services inject the
 host `ElementRef`.
 
-### Two editing modes
+### Editing model
 
-The canvas has two modes, toggled by the header chip or the `M` key.
-
-- **Sketch mode** is the geometric model. Wires are placeable nodes, symbol
-  ports are hidden, and junctions are computed dots painted by an overlay where
-  3+ wire-continuations meet. Connectivity is derived from world positions every
-  render; nothing is stored.
-- **Linking mode** (default) is native ng-diagram editing. Ports are visible,
-  the user draws edges port-to-port, junctions are real selectable nodes, and
-  edges use ng-diagram's built-in orthogonal routing.
+Editing is native ng-diagram: symbol ports are visible, the user draws edges
+port-to-port, and edges use ng-diagram's built-in orthogonal routing. Dropping
+or relinking an edge onto another edge splits it and creates a real
+`sld-junction` node at the meeting point. A separate overlay paints connection
+dots wherever 3+ wire-continuations coincide; those dots are derived from world
+positions every render and never stored, so they can't drift from the geometry.
 
 ### Node types
 
 - `sld-symbol`: an IEC 60617 device. Fixed-size body plus dynamic leads (stubs
-  from each terminal to the body edge) that grow with the bounding box.
-- `sld-wire`: a horizontal or vertical busbar segment (placeable node, not an
-  edge).
+  from each terminal to the body edge that fill the gap to the bounding box).
 - `sld-junction`: an 8 px node with four directional ports, created and torn
   down automatically as edges meet.
 
 ### Keyboard shortcuts
 
-| Key | Action |
+The app uses ng-diagram's built-in shortcuts, also listed in the in-app cheat
+sheet (the help button on the zoom toolbar). Symbol rotation is done with the
+on-canvas rotate handle, snapped to 90°.
+
+| Keys | Action |
 | --- | --- |
-| `R` | Rotate the selected symbols 90 degrees clockwise. |
-| `M` | Toggle between sketch and linking mode. |
-| `Alt` + drag | Move a node together with its whole geometric connected component. |
+| `Click` / `Ctrl`+`Click` | Select / add to selection. |
+| `Shift` + drag | Box-select an area. |
+| `Ctrl`+`A` | Select all. |
+| `Delete` | Remove the selection. |
+| `Ctrl`+`C` / `Ctrl`+`V` | Copy / paste. |
+| `Ctrl` + wheel | Zoom in / out. |
+| `Arrows` | Pan the viewport / move the selection. |
+| `Esc` | Cancel the current gesture. |
 
 ## Use as a template
 
@@ -74,13 +78,13 @@ Common extension points:
   to `src/tools/symbols.config.mjs`, then run `npm run build:symbols`. Do not
   hand-edit the generated `src/app/sld/symbols/symbol-registry.generated.ts` or
   `src/assets/symbols/*.svg`.
-- **Add a node type.** See `src/app/sld/diagram/geometry/node-types.ts` for the
-  type constants and data contracts, and register the component in the template
-  map in `src/app/sld/diagram/canvas/diagram.component.ts`.
+- **Add a node type.** See `src/app/sld/diagram/core/geometry/node-types.ts` for
+  the type constants and data contracts, and register the component in the
+  template map in `src/app/sld/diagram/canvas/diagram.component.ts`.
 - **Add a properties-panel field type.** Register a new Formly type in
   `SldPageComponent.providers`, extend `PropertyType` in
   `src/app/sld/symbols/types.ts`, and extend the mapper in
-  `src/app/sld/properties-panel/formly/field-from-property-def.ts`.
+  `src/app/sld/components/properties-panel/formly/field-from-property-def.ts`.
 
 ## Symbol pipeline
 
@@ -92,13 +96,18 @@ fails loudly if a generated dimension is not a multiple of the grid.
 ## Testing
 
 Unit tests live next to their source as `*.spec.ts` and run on Karma + Jasmine.
-The current suite covers the pure-function geometry, routing, and connectivity
+The current suite covers the pure-function geometry, routing, and junction
 logic. Run a single file with `npm test -- --include='**/path/to/file.spec.ts'`.
 
 ## Documentation
 
-- `CLAUDE.md`: in-depth architecture, conventions, and gotchas.
-- `docs/design-system.md`: design tokens and diagram language.
+Architecture and per-feature guides live next to the code:
+
+- `src/app/sld/diagram/README.md` — the diagram subsystem: `core/` vs
+  `features/`, how a feature registers with the canvas, and the extension-point
+  patterns (`ReshapeExtension`, `DroppedBranch`).
+- `src/app/sld/diagram/features/*/README.md` — one per feature.
+- `src/app/sld/shared/icons/README.md` — the icon system.
 
 ## License
 

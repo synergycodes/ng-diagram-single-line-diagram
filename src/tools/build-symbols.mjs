@@ -8,8 +8,8 @@
 // Body / lead model:
 //   The "body" of a symbol is the central iconographic artwork. The "leads" are the
 //   short stub lines from each terminal to the body edge. At runtime, leads are drawn
-//   DYNAMICALLY from terminal positions to the body edge — so resize only changes lead
-//   length, never the body's size. To make this work, this script splits the .elmt
+//   DYNAMICALLY from terminal positions to the body edge — so the body keeps its fixed
+//   artwork size while leads fill the gap to the bbox edge. To make this work, this script splits the .elmt
 //   primitives into body-vs-lead at build time: any straight line with one endpoint
 //   coinciding with a terminal position is classified as a lead and dropped from the
 //   generated svgBody. Everything else goes into the body.
@@ -25,7 +25,7 @@ const SRC_DIR = join(TOOLS_DIR, 'qet-source');
 const OUT_SVG_DIR = join(ROOT_DIR, 'src', 'assets', 'symbols');
 
 const OUT_TS = join(ROOT_DIR, 'src', 'app', 'sld', 'symbols', 'symbol-registry.generated.ts');
-const CONSTANTS_TS = join(ROOT_DIR, 'src', 'app', 'sld', 'diagram', 'geometry', 'constants.ts');
+const CONSTANTS_TS = join(ROOT_DIR, 'src', 'app', 'sld', 'diagram', 'core', 'geometry', 'constants.ts');
 
 // ──────────────────────────────────────────────────────────────────────────
 // Hyperparameters
@@ -36,7 +36,7 @@ const CONSTANTS_TS = join(ROOT_DIR, 'src', 'app', 'sld', 'diagram', 'geometry', 
 // one symbol — useful for one-off tweaks but the goal is to leave the config
 // minimal and let the parser standardise everything.
 //
-// GRID and STROKE_WIDTH come from src/app/sld/diagram/geometry/constants.ts —
+// GRID and STROKE_WIDTH come from src/app/sld/diagram/core/geometry/constants.ts —
 // single source of truth, shared with runtime. The rest live here because they
 // affect only build-time geometry.
 // ──────────────────────────────────────────────────────────────────────────

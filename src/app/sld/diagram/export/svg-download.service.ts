@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 
+// Triggers a browser download of an SVG string — the client-side file-saving
+// step for an exported diagram, separate from the model-to-SVG serialization.
 @Injectable({ providedIn: 'root' })
 export class SvgDownloadService {
   download(svg: string, baseName = 'sld'): void {

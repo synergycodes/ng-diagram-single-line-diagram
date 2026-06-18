@@ -1,0 +1,152 @@
+:host {
+  position: absolute;
+  bottom: var(--gutter);
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-md);
+  color: var(--c-text-2);
+  font-family: var(--font-sans);
+  user-select: none;
+  z-index: var(--z-panel);
+}
+
+.zoom__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--c-text-2);
+  cursor: pointer;
+  transition:
+    background var(--t-fast),
+    color var(--t-fast);
+
+  &:hover:not(:disabled) {
+    background: var(--c-node-hover);
+    color: var(--c-text);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--c-node-selected);
+  }
+
+  &.is-active {
+    background: var(--c-node-hover);
+    color: var(--c-brand-500);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--c-focus-ring);
+  }
+}
+
+.zoom__pct {
+  min-width: 44px;
+  height: 32px;
+  padding: 0 var(--s-3);
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--c-text);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-tight);
+  cursor: pointer;
+  transition: background var(--t-fast);
+
+  &:hover {
+    background: var(--c-node-hover);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--c-focus-ring);
+  }
+}
+
+.zoom__sep {
+  width: 1px;
+  height: 20px;
+  background: var(--c-border);
+}
+
+.zoom__minimap-popover {
+  position: absolute;
+  bottom: calc(100% + var(--s-2));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--s-2);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-md, var(--sh-sm));
+  animation: zoom-toolbar-minimap-in var(--t-fast) ease-out;
+}
+
+@keyframes zoom-toolbar-minimap-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.zoom__minimap {
+  // ng-diagram's minimap host styles set absolute corner anchoring — override with !important.
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  display: block;
+
+  --ngd-minimap-viewport-bg: var(--c-brand-50);
+  --ngd-minimap-viewport-border: var(--c-brand-500);
+}
+
+.zoom__cheatsheet-popover {
+  position: absolute;
+  bottom: calc(100% + var(--s-2));
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  padding: var(--s-3) var(--s-4);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-md, var(--sh-sm));
+  animation: zoom-toolbar-cheatsheet-in var(--t-fast) ease-out;
+}
+
+@keyframes zoom-toolbar-cheatsheet-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}

@@ -1,69 +1,24 @@
 @import './tokens.css';
 @import 'ng-diagram/styles.css';
 
-// ──────────────────────────────────────────────────────────────────────────
-// Resize-adornment overrides
-//
-// Replace ng-diagram's default "4 corner handles + 4 full-edge lines" with a
-// minimal set of mid-edge handles ONLY on the sides that have a terminal +
-// lead. The symbol/wire components emit `has-resize-{side}` host classes;
-// everything not whitelisted stays hidden.
-//
-// Why global: the resize-line and resize-handle inner components are not
-// exported by ng-diagram, so we can't intercept their templates. Targeting
-// them by their stable class names is the cleanest hook.
-// ──────────────────────────────────────────────────────────────────────────
-
-ng-diagram-node-resize-adornment {
-  // Kill the 4 corner handles outright — we never want them on SLD symbols.
-  ng-diagram-resize-handle {
-    display: none;
-  }
-
-  // Hide all edge lines by default; the per-side rules below re-enable the
-  // ones that match a terminal-with-lead.
-  ng-diagram-resize-line {
-    display: none;
-
-    // Remove the default full-edge border line. We replace the visual with a
-    // small square via the line's `::before` pseudo-element (handled by
-    // ng-diagram's existing CSS — we just restyle it).
-    border-top: 0 !important;
-    border-right: 0 !important;
-    border-bottom: 0 !important;
-    border-left: 0 !important;
-
-    &::before {
-      // Override ng-diagram's default 100%-wide hover strip with a compact,
-      // visible square centred on the edge — sits right on the terminal point.
-      width: 10px !important;
-      height: 10px !important;
-      background-color: var(--c-brand-500);
-      border: 1.5px solid var(--c-canvas);
-      border-radius: 2px;
-      box-sizing: border-box;
-    }
-  }
-
-  &.has-resize-top ng-diagram-resize-line.resize-line--top {
-    display: block;
-  }
-  &.has-resize-right ng-diagram-resize-line.resize-line--right {
-    display: block;
-  }
-  &.has-resize-bottom ng-diagram-resize-line.resize-line--bottom {
-    display: block;
-  }
-  &.has-resize-left ng-diagram-resize-line.resize-line--left {
-    display: block;
-  }
+// SLD links use ng-diagram's documented default-edge CSS variables (see the
+// Edges styling guide). Colors come from the `--ngd-default-edge-*` semantic
+// vars set on the diagram host; width + linecap have no semantic var, so they
+// live here. Links stay thinner than the symbol stroke to keep wiring quiet;
+// round caps match the symbol leads (default `butt` leaves a notch at the seam).
+app-diagram ng-diagram-base-edge.default-edge {
+  --edge-stroke-width: 1;
+  --edge-stroke-transition:
+    stroke 120ms cubic-bezier(0.2, 0.6, 0.2, 1), stroke-width 120ms cubic-bezier(0.2, 0.6, 0.2, 1);
 }
 
-// Linking mode is for wiring connections, not adjusting geometry — hide every
-// resize handle so the side mid-edge markers don't compete with port hitboxes.
-// Hidden = no hit area, so the gesture is suppressed too.
-app-diagram.mode-linking ng-diagram-resize-line {
-  display: none !important;
+app-diagram ng-diagram-base-edge.default-edge.selected {
+  --edge-stroke-width: 2.5;
+}
+
+app-diagram ng-diagram-base-edge path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 // Chromium palette drag-image fix: ng-diagram clones the preview into <body>
