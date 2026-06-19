@@ -1,0 +1,70 @@
+<button
+  type="button"
+  class="zoom__btn"
+  title="Zoom out"
+  [disabled]="!viewport.canZoomOut()"
+  (click)="zoomOut()"
+>
+  <app-icon name="zoom-out" [size]="18" />
+</button>
+
+<button type="button" class="zoom__pct" title="Reset to 100%" (click)="resetZoom()">
+  {{ zoomPercent() }}%
+</button>
+
+<button
+  type="button"
+  class="zoom__btn"
+  title="Zoom in"
+  [disabled]="!viewport.canZoomIn()"
+  (click)="zoomIn()"
+>
+  <app-icon name="zoom-in" [size]="18" />
+</button>
+
+<span class="zoom__sep" aria-hidden="true"></span>
+
+<button type="button" class="zoom__btn" title="Fit to screen" (click)="fit()">
+  <app-icon name="fit" [size]="18" />
+</button>
+
+<button
+  type="button"
+  class="zoom__btn"
+  [class.is-active]="minimapOpen()"
+  [attr.aria-pressed]="minimapOpen()"
+  [title]="minimapOpen() ? 'Hide minimap' : 'Show minimap'"
+  (click)="toggleMinimap()"
+>
+  <app-icon name="minimap" [size]="18" />
+</button>
+
+<button
+  type="button"
+  class="zoom__btn"
+  [class.is-active]="cheatSheetOpen()"
+  [attr.aria-pressed]="cheatSheetOpen()"
+  [title]="cheatSheetOpen() ? 'Hide shortcuts' : 'Keyboard shortcuts'"
+  (click)="toggleCheatSheet()"
+>
+  <app-icon name="help" [size]="18" />
+</button>
+
+@if (minimapOpen()) {
+  <div class="zoom__minimap-popover" role="region" aria-label="Minimap">
+    <ng-diagram-minimap
+      class="zoom__minimap"
+      [width]="220"
+      [height]="150"
+      [showZoomControls]="false"
+      [deferNodeUpdates]="true"
+      [nodeStyle]="minimapNodeStyle()"
+    />
+  </div>
+}
+
+@if (cheatSheetOpen()) {
+  <div class="zoom__cheatsheet-popover" role="region" aria-label="Keyboard shortcuts">
+    <app-cheat-sheet />
+  </div>
+}

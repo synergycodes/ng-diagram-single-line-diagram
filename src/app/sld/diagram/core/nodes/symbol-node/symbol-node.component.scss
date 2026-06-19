@@ -1,0 +1,247 @@
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: var(--c-text);
+  font-family: var(--font-mono);
+}
+
+// Hover / selection backdrop — a fixed square box centred on the node,
+// side = max(bbox w/h) + padding (`--sel-box-side`, set by the component).
+// Painted by ::before so it sits under the body/leads/tag.
+:host::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--sel-box-side, 100%);
+  height: var(--sel-box-side, 100%);
+  transform: translate(-50%, -50%);
+  border-radius: var(--r-md);
+  pointer-events: none;
+  transition:
+    background var(--t-fast),
+    box-shadow var(--t-fast);
+}
+
+:host(:hover)::before {
+  background: var(--c-node-hover);
+}
+
+// Declared after :hover so selection wins when a node is both. Selection card:
+// tinted fill + thin acc6 inner border + thicker orange outer frame.
+:host(.ng-diagram-node-selected)::before {
+  background: var(--c-node-sel-bg);
+  box-shadow:
+    inset 0 0 0 2px var(--c-node-selected-bd),
+    0 0 0 3px var(--c-node-sel-bd-outer);
+}
+
+.sld-symbol {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+
+  &__body {
+    position: absolute;
+    pointer-events: none;
+
+    ::ng-deep svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+  }
+
+  &__leads {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    // Terminals at xPct 0/100 sit on the viewBox edge — default `overflow:
+    // hidden` would clip half the stroke and render the lead at ~0.75 px.
+    overflow: visible;
+  }
+
+  &__port {
+    // 1×1 routing anchor.
+    --ngd-port-size: 1px;
+    --ngd-port-border-size: 0;
+    --ngd-port-background-color: transparent;
+    // Suppress ng-diagram hover style — its hover circle is centred on the
+    // port rect (0.5 px off the terminal) and conflicts with our ::after ring.
+    --ngd-port-background-color-hover: transparent;
+    --ngd-port-border-color-hover: transparent;
+    position: absolute;
+    pointer-events: none;
+
+    &.top {
+      transform: translate(-50%, 0%);
+    }
+    &.bottom {
+      transform: translate(-50%, -100%);
+    }
+    &.left {
+      transform: translate(0%, -50%);
+    }
+    &.right {
+      transform: translate(-100%, -50%);
+    }
+  }
+
+  &__port::before {
+    content: '';
+    position: absolute;
+    width: var(--port-hit-size);
+    height: var(--port-hit-size);
+    border-radius: 50%;
+    background: transparent;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  &__port.top::before {
+    top: 0;
+    left: 50%;
+  }
+  &__port.bottom::before {
+    top: 100%;
+    left: 50%;
+  }
+  &__port.left::before {
+    top: 50%;
+    left: 0;
+  }
+  &__port.right::before {
+    top: 50%;
+    left: 100%;
+  }
+
+  &__port::after {
+    content: '';
+    position: absolute;
+    width: var(--port-dot-size);
+    height: var(--port-dot-size);
+    border-radius: 50%;
+    background: var(--c-selection-bd);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity var(--t-fast);
+    pointer-events: none;
+  }
+
+  &__port.top::after {
+    top: 0;
+    left: 50%;
+  }
+  &__port.bottom::after {
+    top: 100%;
+    left: 50%;
+  }
+  &__port.left::after {
+    top: 50%;
+    left: 0;
+  }
+  &__port.right::after {
+    top: 50%;
+    left: 100%;
+  }
+
+  // Control ports read square + cyan vs power's round + gold, so the kind is
+  // clear at a glance. `validateConnection` is still the authoritative gate.
+  &__port--control::after {
+    border-radius: 1px;
+    background: var(--c-control);
+  }
+
+  &__tag {
+    position: absolute;
+    font-size: var(--fs-10);
+    font-weight: var(--fw-semi);
+    color: var(--c-text);
+    letter-spacing: var(--ls-tight);
+    white-space: nowrap;
+    pointer-events: none;
+    // Canvas-coloured backing so the selection box border/fill is masked where
+    // the label crosses it (the border appears to break around the label).
+    // Matches the canvas exactly, so it's invisible when no box is shown.
+    // Tight padding keeps the label close to the symbol (the backing only needs
+    // a hair of margin to mask the thin border).
+    background: var(--c-canvas);
+    padding: var(--s-1);
+    border-radius: var(--r-xs);
+
+    // The tag counter-rotates (`--tag-counter-rot` = -node.angle) so it stays
+    // horizontal as the node rotates; it orbits to the matching free side.
+    // transform-origin defaults to the tag centre, pinned at the anchor.
+    &--right {
+      left: calc(100% + 2px);
+      top: 50%;
+      transform: translateY(-50%) rotate(var(--tag-counter-rot, 0deg));
+    }
+    &--left {
+      right: calc(100% + 2px);
+      top: 50%;
+      transform: translateY(-50%) rotate(var(--tag-counter-rot, 0deg));
+    }
+    &--bottom {
+      left: 50%;
+      top: calc(100% + 2px);
+      transform: translateX(-50%) rotate(var(--tag-counter-rot, 0deg));
+    }
+    &--top {
+      left: 50%;
+      bottom: calc(100% + 2px);
+      transform: translateX(-50%) rotate(var(--tag-counter-rot, 0deg));
+    }
+  }
+}
+
+:host(.ng-diagram-node-selected) {
+  // Symbol stroke turns the selection gold (acc6-500); labels stay dark
+  // (gray-900 in light) so they read against the tinted card.
+  color: var(--c-selection-bd);
+
+  .sld-symbol__tag {
+    color: var(--c-node-sel-label);
+  }
+}
+
+// Hover: show every port on the symbol under the cursor regardless of kind.
+:host(:hover) .sld-symbol__port::before,
+:host(:hover) .sld-symbol__port::after {
+  pointer-events: auto;
+}
+
+:host(:hover) .sld-symbol__port::after {
+  opacity: 1;
+}
+
+// During a power gesture only power ports are valid targets — hide & disable
+// control ports across the diagram so the cursor doesn't snap or pulse onto
+// them. `validateConnection` would reject anyway, but suppressing the visual
+// avoids "looks like a valid drop" confusion. Same logic mirrored for control.
+:host-context(app-diagram.is-linking-power) .sld-symbol__port--power::before,
+:host-context(app-diagram.is-linking-power) .sld-symbol__port--power::after,
+:host-context(app-diagram.is-linking-control) .sld-symbol__port--control::before,
+:host-context(app-diagram.is-linking-control) .sld-symbol__port--control::after {
+  pointer-events: auto;
+}
+
+:host-context(app-diagram.is-linking-power) .sld-symbol__port--power::after,
+:host-context(app-diagram.is-linking-control) .sld-symbol__port--control::after {
+  opacity: 1;
+}
+
+// Cross-kind suppression beats the hover rule above (same specificity but
+// comes later, with a stricter selector). Without this, hovering the symbol
+// body during a typed gesture flashes the opposite-kind ports.
+:host-context(app-diagram.is-linking-power) .sld-symbol__port--control::before,
+:host-context(app-diagram.is-linking-power) .sld-symbol__port--control::after,
+:host-context(app-diagram.is-linking-control) .sld-symbol__port--power::before,
+:host-context(app-diagram.is-linking-control) .sld-symbol__port--power::after {
+  pointer-events: none;
+  opacity: 0;
+}

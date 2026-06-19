@@ -1,0 +1,24 @@
+<div class="theme-toggle" role="radiogroup" aria-label="Color theme">
+  <button
+    type="button"
+    role="radio"
+    class="theme-toggle__btn"
+    [class.is-active]="theme() === 'light'"
+    [attr.aria-checked]="theme() === 'light'"
+    title="Light theme"
+    (click)="select('light')"
+  >
+    <app-icon name="theme-light" [size]="16" />
+  </button>
+  <button
+    type="button"
+    role="radio"
+    class="theme-toggle__btn"
+    [class.is-active]="theme() === 'dark'"
+    [attr.aria-checked]="theme() === 'dark'"
+    title="Dark theme"
+    (click)="select('dark')"
+  >
+    <app-icon name="theme-dark" [size]="16" />
+  </button>
+</div>

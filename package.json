@@ -1,7 +1,29 @@
 {
   "name": "single-line-diagram",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Single-line diagram (SLD) builder for high-voltage substations, built with Angular and ng-diagram",
   "license": "MIT",
+  "author": "Synergia Pro Sp. z o.o.",
+  "keywords": [
+    "single-line-diagram",
+    "sld",
+    "electrical",
+    "substation",
+    "schematic",
+    "power-systems",
+    "diagram",
+    "diagramming",
+    "node-editor",
+    "angular",
+    "typescript",
+    "ng-diagram",
+    "visualization"
+  ],
+  "homepage": "https://www.ngdiagram.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/synergycodes/ng-diagram-single-line-diagram.git"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -13,7 +35,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
-  "private": true,
   "dependencies": {
     "@angular/common": "^19.2.0",
     "@angular/compiler": "^19.2.0",

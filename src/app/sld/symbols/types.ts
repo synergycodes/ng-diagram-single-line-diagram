@@ -1,5 +1,8 @@
+// The blueprint the palette, properties panel, and diagram all read from;
+// produced by the generated registry, consumed everywhere else.
+
+// Palette groupings, modelled on IEC 60617 equipment families.
 export type SymbolCategory =
-  | 'wires'
   | 'switchgear'
   | 'transformers'
   | 'measurement'
@@ -7,6 +10,7 @@ export type SymbolCategory =
   | 'sources-loads'
   | 'compensation';
 
+// Voltage class, used for filtering and styling (low/medium/high/extra-high/DC).
 export type VoltageTier = 'lv' | 'mv' | 'hv' | 'ehv' | 'dc';
 
 export type TerminalSide = 'top' | 'right' | 'bottom' | 'left';
@@ -15,6 +19,8 @@ export type TerminalSide = 'top' | 'right' | 'bottom' | 'left';
  *  (signalling / interlock). Links connect only between same-kind terminals. */
 export type LinkKind = 'power' | 'control';
 
+// A connection point on a symbol. Position is given as a percentage of the body
+// box so it stays correct at any display size.
 export interface Terminal {
   readonly id: string;
   readonly side: TerminalSide;
@@ -34,6 +40,7 @@ export interface PropertyDef {
   readonly options?: readonly string[];
 }
 
+// SVG viewBox for the symbol body, mirroring the source artwork's coordinates.
 export interface ViewBox {
   readonly x: number;
   readonly y: number;
@@ -47,7 +54,7 @@ export interface SymbolDef {
   readonly category: SymbolCategory;
   readonly voltageTier: VoltageTier;
   readonly displaySize: { readonly width: number; readonly height: number };
-  // Body stays fixed-size centred in the bbox; resize only changes lead length.
+  // Body stays fixed-size centred in the bbox; leads fill the gap to the bbox edge.
   readonly body: { readonly width: number; readonly height: number };
   readonly bodyViewBox: ViewBox;
   // BODY only — leads are rendered dynamically from terminal positions.

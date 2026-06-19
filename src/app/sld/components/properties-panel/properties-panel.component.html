@@ -1,0 +1,42 @@
+@let def = selectedSymbolDef();
+@let node = selectedNode();
+
+@if (def && node) {
+  <aside class="prop">
+    <header class="prop__header">
+      <div class="prop__thumb" aria-hidden="true" [innerHTML]="thumbnailSvg()"></div>
+      <div class="prop__heading">
+        <p class="prop__title" [title]="title()">{{ title() }}</p>
+        <p class="prop__subtitle" [title]="subtitle()">{{ subtitle() }}</p>
+      </div>
+      <button
+        type="button"
+        class="prop__close"
+        title="Deselect"
+        aria-label="Deselect"
+        (click)="close()"
+      >
+        <app-icon name="close" [size]="18" />
+      </button>
+    </header>
+
+    <div class="prop__divider" aria-hidden="true"></div>
+
+    <div class="prop__body">
+      <section class="prop__section">
+        <h3 class="prop__section-title">
+          Properties
+          <span class="prop__section-tag">{{ def.category }}</span>
+        </h3>
+        <form [formGroup]="form()" class="prop__form">
+          <formly-form
+            [form]="form()"
+            [model]="model()"
+            [fields]="fields()"
+            (modelChange)="onModelChange($event)"
+          />
+        </form>
+      </section>
+    </div>
+  </aside>
+}

@@ -1,0 +1,50 @@
+<ng-diagram-node-rotate-adornment />
+
+<div class="sld-symbol">
+  <div
+    class="sld-symbol__body"
+    [style.left.px]="bodyRect().left"
+    [style.top.px]="bodyRect().top"
+    [style.width.px]="bodyRect().width"
+    [style.height.px]="bodyRect().height"
+    [innerHTML]="bodySvgHtml()"
+  ></div>
+
+  <svg
+    class="sld-symbol__leads"
+    [attr.width]="bbox().width"
+    [attr.height]="bbox().height"
+    [attr.viewBox]="'0 0 ' + bbox().width + ' ' + bbox().height"
+    fill="none"
+    stroke="currentColor"
+    aria-hidden="true"
+  >
+    @for (lead of leads(); track lead.id) {
+      <line
+        [attr.x1]="lead.x1"
+        [attr.y1]="lead.y1"
+        [attr.x2]="lead.x2"
+        [attr.y2]="lead.y2"
+        [attr.stroke-width]="strokeWidth"
+        [attr.stroke-dasharray]="lead.kind === 'control' ? controlDasharray : null"
+        stroke-linecap="round"
+      />
+    }
+  </svg>
+
+  @if (tagLabel()) {
+    <span class="sld-symbol__tag" [class]="'sld-symbol__tag--' + tagSide()">{{ tagLabel() }}</span>
+  }
+
+  <!-- Ports stay in the DOM at all times; CSS reveals them on hover / during a gesture. -->
+  @for (port of ports(); track port.id) {
+    <ng-diagram-port
+      [id]="port.id"
+      type="both"
+      [side]="port.side"
+      [class]="'sld-symbol__port sld-symbol__port--' + port.kind"
+      [style.left.%]="port.xPct"
+      [style.top.%]="port.yPct"
+    />
+  }
+</div>

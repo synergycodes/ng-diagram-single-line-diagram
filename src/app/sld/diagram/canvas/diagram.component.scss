@@ -11,11 +11,9 @@
   --ngd-diagram-background-color: var(--c-canvas);
   --ngd-background-dot-color: var(--c-border);
 
-  // Kill ng-diagram's default purple node-selection ring — the symbol node
-  // draws its own gold square selection box. Recolor any stray transform-box
-  // adornment to the selection gold too.
+  // The symbol node draws its own gold square selection box, so suppress
+  // ng-diagram's default node-selection shadow.
   --ngd-selected-node-box-shadow: none;
-  --ngd-transform-box: var(--c-selection-bd);
 
   // Links recede vs symbols: dimmer + thinner (see --c-edge / --edge-stroke-width).
   // Hover brightens the link toward --c-text; selected turns gold.
@@ -29,44 +27,4 @@
   --ngd-background-line-major-color: var(--c-border-strong);
   --ngd-background-line-major-opacity: 0.75;
   --ngd-background-line-major-width: 0.75px;
-
-  ::ng-deep ng-diagram-base-edge.default-edge {
-    // Links are finer than the symbol stroke — keeps the wiring quiet so the
-    // symbols dominate.
-    --edge-stroke-width: 1;
-    --edge-stroke-transition:
-      stroke 120ms cubic-bezier(0.2, 0.6, 0.2, 1), stroke-width 120ms cubic-bezier(0.2, 0.6, 0.2, 1);
-  }
-
-  ::ng-deep ng-diagram-base-edge.default-edge:hover:not(.selected) {
-    --edge-stroke: var(--c-text);
-  }
-
-  ::ng-deep ng-diagram-base-edge.default-edge.selected {
-    --edge-stroke-width: 2.5;
-  }
-  ::ng-deep ng-diagram-base-edge.default-edge.selected path {
-    filter: drop-shadow(0 0 3px var(--c-focus-ring));
-  }
-
-  // Round linecaps match the symbol leads — default `butt` leaves a ~0.75 px notch at the seam.
-  ::ng-deep ng-diagram-base-edge path {
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  &.is-alt-drag,
-  &.is-alt-drag ::ng-deep * {
-    cursor: all-scroll !important;
-  }
-
-  // Force a stable grabbing cursor across the canvas while a link-draw or
-  // relink gesture is in flight. ng-diagram's native linking otherwise lets
-  // the cursor flip back to `default`/`pointer` whenever the pointer crosses
-  // between ports, symbol bodies, and bare canvas — relink already feels
-  // right because its overlay uses `setPointerCapture` + `.is-dragging`.
-  &.is-linking-gesture,
-  &.is-linking-gesture ::ng-deep * {
-    cursor: grabbing !important;
-  }
 }
