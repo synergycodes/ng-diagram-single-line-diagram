@@ -12,8 +12,8 @@ export interface DiagramBounds {
 }
 
 /**
- * Orchestrates a DXF export run. Domain-free: knows nothing about device
- * nodes, wires, or any other av-schematic concept — it just dispatches each
+ * Orchestrates a DXF export run. Domain-free: knows nothing about symbols,
+ * links, or any other diagram-specific concept — it just dispatches each
  * node/edge to the renderer registered for its `type` in DxfExportConfig.
  *
  * To support a new node or edge type, register a renderer in the export

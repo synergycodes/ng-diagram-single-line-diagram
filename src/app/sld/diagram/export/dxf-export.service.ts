@@ -6,9 +6,9 @@ import { DxfExporter } from './dxf/dxf-exporter';
 import { DxfWriter } from './dxf/dxf-writer';
 
 // Builds a DXF (AutoCAD R2000+) document straight from the live model — the
-// CAD counterpart to SvgExportService. The generic `dxf/` library is vendored
-// verbatim from ng-diagram-av-schematic; this service only walks the model,
-// hands it to the SLD-configured DxfExporter, and serialises the result.
+// CAD counterpart to SvgExportService. The generic `dxf/` library is a
+// domain-free, vendored serializer; this service only walks the model, hands
+// it to the SLD-configured DxfExporter, and serialises the result.
 @Injectable()
 export class DxfExportService {
   private readonly modelService = inject(NgDiagramModelService);
