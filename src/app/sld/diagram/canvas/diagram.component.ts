@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { NgDiagramActionsAdapter } from '../core/ng-diagram-bridge/ng-diagram-actions.adapter';
 import { SvgExportService } from '../export/svg-export.service';
 import { SvgDownloadService } from '../export/svg-download.service';
+import { DxfExportService } from '../export/dxf-export.service';
+import { DxfDownloadService } from '../export/dxf-download.service';
 import { ExportBridgeService } from '../export/export-bridge.service';
 import { SchematicNameService } from '../../services/schematic-name.service';
 import {
@@ -65,6 +67,7 @@ import { buildMinimapNodeStyle } from '../core/ng-diagram-bridge/minimap-node-st
     ...provideRelink(),
     NgDiagramActionsAdapter,
     SvgExportService,
+    DxfExportService,
   ],
   host: {
     '[class.is-linking-gesture]': 'isLinkingGesture()',
@@ -81,9 +84,11 @@ export class DiagramComponent {
   private readonly actions = inject(NgDiagramActionsAdapter);
   private readonly linkDraw = inject(LinkDrawService);
   private readonly relinkGesture = inject(RelinkGestureService);
-  // The navbar Export button reaches these through the bridge.
+  // The navbar Export buttons reach these through the bridge.
   private readonly svgExport = inject(SvgExportService);
   private readonly svgDownload = inject(SvgDownloadService);
+  private readonly dxfExport = inject(DxfExportService);
+  private readonly dxfDownload = inject(DxfDownloadService);
   private readonly exportBridge = inject(ExportBridgeService);
   private readonly schematicName = inject(SchematicNameService);
 
@@ -130,11 +135,14 @@ export class DiagramComponent {
   protected readonly minimapNodeStyle = buildMinimapNodeStyle(this.registry);
 
   protected onDiagramInit(_event: DiagramInitEvent): void {
-    // Expose SVG export to page-level chrome (the navbar Export button).
+    // Expose the exports to page-level chrome (the navbar Export buttons).
     // File name follows the current schematic name.
-    this.exportBridge.register(() =>
-      this.svgDownload.download(this.svgExport.exportToSvg(), this.schematicName.fileName()),
-    );
+    this.exportBridge.register({
+      svg: () =>
+        this.svgDownload.download(this.svgExport.exportToSvg(), this.schematicName.fileName()),
+      dxf: () =>
+        this.dxfDownload.download(this.dxfExport.exportToDxf(), this.schematicName.fileName()),
+    });
   }
 
   async onNodeRotateEnded(event: NodeRotateEndedEvent): Promise<void> {

@@ -75,7 +75,11 @@ export class SldPageComponent {
   }
 
   protected exportSvg(): void {
-    this.exportBridge.export();
+    this.exportBridge.exportSvg();
+  }
+
+  protected exportDxf(): void {
+    this.exportBridge.exportDxf();
   }
 
   protected startNameEdit(): void {
