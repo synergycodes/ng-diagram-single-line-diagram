@@ -30,6 +30,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless",
     "build:symbols": "node src/tools/build-symbols.mjs",
     "lint": "ng lint",
     "format": "prettier --write .",
