@@ -43,7 +43,17 @@
       (click)="exportSvg()"
     >
       <app-icon name="export" [size]="16" />
-      Export
+      SVG
+    </button>
+    <button
+      type="button"
+      class="navbar__export"
+      [disabled]="!exportReady()"
+      title="Export the diagram as a DXF (AutoCAD) drawing"
+      (click)="exportDxf()"
+    >
+      <app-icon name="export" [size]="16" />
+      DXF
     </button>
   </div>
 </header>

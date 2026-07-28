@@ -1,24 +1,33 @@
 import { Injectable, signal } from '@angular/core';
 
+export interface ExportHandlers {
+  readonly svg: () => void;
+  readonly dxf: () => void;
+}
+
 /**
- * Root-level bridge so page-level chrome (the navbar Export button) can trigger
- * the SVG export that lives inside the diagram's DI scope. `SvgExportService`
- * depends on `JunctionsService` (provided on `DiagramComponent`), so it
+ * Root-level bridge so page-level chrome (the navbar Export buttons) can trigger
+ * the exports that live inside the diagram's DI scope. `SvgExportService` /
+ * `DxfExportService` depend on services provided on `DiagramComponent`, so they
  * can't be injected above the diagram — `DiagramComponent` registers the
- * handler on init and the navbar calls `export()`.
+ * handlers on init and the navbar calls `exportSvg()` / `exportDxf()`.
  */
 @Injectable({ providedIn: 'root' })
 export class ExportBridgeService {
-  private handler: (() => void) | null = null;
+  private handlers: ExportHandlers | null = null;
 
   readonly ready = signal(false);
 
-  register(handler: () => void): void {
-    this.handler = handler;
+  register(handlers: ExportHandlers): void {
+    this.handlers = handlers;
     this.ready.set(true);
   }
 
-  export(): void {
-    this.handler?.();
+  exportSvg(): void {
+    this.handlers?.svg();
+  }
+
+  exportDxf(): void {
+    this.handlers?.dxf();
   }
 }
