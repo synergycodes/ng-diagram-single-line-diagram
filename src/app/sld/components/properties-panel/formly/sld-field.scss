@@ -14,7 +14,7 @@
     gap: var(--s-2);
     font-size: var(--fs-10);
     font-weight: var(--fw-regular);
-    color: var(--c-text-2);
+    color: var(--c-field-label);
     letter-spacing: var(--ls-tight);
   }
 
@@ -40,7 +40,7 @@
     border: 1px solid var(--c-border);
     border-radius: var(--r-sm);
     background: var(--c-field-bg);
-    color: var(--c-text);
+    color: var(--c-field-value);
     font-family: var(--font-sans);
     font-size: var(--fs-12);
     line-height: var(--lh-snug);
