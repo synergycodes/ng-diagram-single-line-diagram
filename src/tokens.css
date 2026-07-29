@@ -176,6 +176,9 @@ html[data-theme='light'] {
   --c-border-strong: var(--prim-gray-450); /* hover / emphasised */
   --c-divider: var(--prim-gray-300);
 
+  --c-grid-minor: var(--prim-gray-400); /* canvas grid — minor lines / dots */
+  --c-grid-major: var(--prim-gray-450); /* canvas grid — major lines */
+
   --c-text: var(--prim-gray-800); /* primary text + symbol stroke (dark on canvas) */
   --c-text-2: var(--prim-gray-600); /* secondary */
   --c-text-3: var(--prim-gray-500); /* tertiary, labels, hints */
@@ -241,6 +244,9 @@ html[data-theme='dark'] {
   --c-border: var(--prim-gray-600); /* default control border */
   --c-border-strong: var(--prim-gray-500); /* hover / emphasised */
   --c-divider: var(--prim-gray-650);
+
+  --c-grid-minor: var(--prim-gray-650); /* canvas grid — minor lines / dots */
+  --c-grid-major: var(--prim-gray-600); /* canvas grid — major lines */
 
   --c-text: var(--prim-gray-100); /* primary text + symbol stroke (white on canvas) */
   --c-text-2: var(--prim-gray-400); /* secondary */
