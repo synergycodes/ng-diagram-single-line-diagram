@@ -99,7 +99,6 @@
    junction, dangling, and symbol-port stylesheets. Theme-independent.
    ========================================================================== */
 :root {
-  --port-hit-size: 16px; /* transparent grab target; mirrors PORT_SNAP_PX (GRID*2) in geometry/constants.ts */
   --port-dot-size: 8px; /* visible symbol-port dot */
   --handle-dot-size: 10px; /* relink / junction / dangling connection ring */
   --handle-dot-border: 1.5px; /* ring stroke — distinct from the 2px symbol STROKE_WIDTH */

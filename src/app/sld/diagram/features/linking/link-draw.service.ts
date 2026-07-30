@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { NgDiagramModelService, type EdgeDrawEndedEvent } from 'ng-diagram';
 import { JunctionAttachmentService } from '../junctions';
 import { findEdgeSplitHit } from '../../core/geometry/edge-split';
+import { portWorldPosition } from '../../core/geometry/port-position';
 import { SymbolRegistryService } from '../../../symbols/symbol-registry.service';
 import { GRID } from '../../core/geometry/constants';
 import {
@@ -11,6 +12,9 @@ import {
   type LinkKind,
 } from '../../core/geometry/node-types';
 import { NewDrawBranch } from './new-draw-branch';
+
+// Half of ng-diagram's 18px port halo + offset for pointer jitter.
+const CLICK_RADIUS_PX = 12;
 
 // Turns a native port-to-port draw into a real connection on drop. Owns only the
 // draw-gesture entry point and the resolution ORDER — nearby junction → dangling
@@ -31,6 +35,18 @@ export class LinkDrawService {
     if (!event.sourcePort) return;
 
     const sourceNode = this.modelService.getNodeById(event.source.id);
+
+    // A draw that ended inside the port's own hitbox is an accidental click,
+    // not a wire — ignore it.
+    const sourcePos = portWorldPosition(sourceNode, event.sourcePort);
+    if (
+      sourcePos &&
+      Math.hypot(event.dropPosition.x - sourcePos.x, event.dropPosition.y - sourcePos.y) <
+        CLICK_RADIUS_PX
+    ) {
+      return;
+    }
+
     // Same-kind gating: power/control branches see only their own graph.
     const kind: LinkKind =
       portKind(sourceNode, event.sourcePort, (id) => this.registry.getById(id)) ?? 'power';

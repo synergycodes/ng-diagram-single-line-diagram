@@ -91,45 +91,26 @@
     }
   }
 
+  // Enable ng-diagram's own ::before halo (18px, centred) as the grab area —
+  // the port host itself is pointer-events: none.
   &__port::before {
-    content: '';
-    position: absolute;
-    width: var(--port-hit-size);
-    height: var(--port-hit-size);
-    border-radius: 50%;
-    background: transparent;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
+    pointer-events: auto;
   }
 
-  &__port.top::before {
-    top: 0;
-    left: 50%;
-  }
-  &__port.bottom::before {
-    top: 100%;
-    left: 50%;
-  }
-  &__port.left::before {
-    top: 50%;
-    left: 0;
-  }
-  &__port.right::before {
-    top: 50%;
-    left: 100%;
-  }
-
+  // Margins, not translate — a second transform layer nested in the
+  // transformed port would snap the dot up to a device pixel off the lead.
   &__port::after {
     content: '';
     position: absolute;
     width: var(--port-dot-size);
     height: var(--port-dot-size);
+    margin-left: calc(var(--port-dot-size) / -2);
+    margin-top: calc(var(--port-dot-size) / -2);
     border-radius: 50%;
     background: var(--c-selection-bd);
-    transform: translate(-50%, -50%);
     opacity: 0;
     transition: opacity var(--t-fast);
-    pointer-events: none;
+    pointer-events: auto;
   }
 
   &__port.top::after {
@@ -209,12 +190,9 @@
   }
 }
 
-// Hover: show every port on the symbol under the cursor regardless of kind.
-:host(:hover) .sld-symbol__port::before,
-:host(:hover) .sld-symbol__port::after {
-  pointer-events: auto;
-}
-
+// The hovered port lights up from its own hit circle; hovering the node
+// reveals every port.
+.sld-symbol__port:hover::after,
 :host(:hover) .sld-symbol__port::after {
   opacity: 1;
 }

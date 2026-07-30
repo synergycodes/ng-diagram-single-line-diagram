@@ -34,44 +34,23 @@
   }
 }
 
-// Shares --port-hit-size with symbol-node so hitboxes match.
+// Enable ng-diagram's own ::before halo as the grab area (see symbol-node).
 .sld-junction__port::before {
-  content: '';
-  position: absolute;
-  width: var(--port-hit-size);
-  height: var(--port-hit-size);
-  border-radius: 50%;
-  background: transparent;
-  transform: translate(-50%, -50%);
   pointer-events: auto;
 }
 
-.sld-junction__port.top::before {
-  top: 0;
-  left: 50%;
-}
-.sld-junction__port.bottom::before {
-  top: 100%;
-  left: 50%;
-}
-.sld-junction__port.left::before {
-  top: 50%;
-  left: 0;
-}
-.sld-junction__port.right::before {
-  top: 50%;
-  left: 100%;
-}
-
+// Margins, not translate — same nested-transform-snap rationale as in
+// symbol-node.component.scss.
 .sld-junction__port::after {
   content: '';
   position: absolute;
   width: var(--handle-dot-size);
   height: var(--handle-dot-size);
+  margin-left: calc(var(--handle-dot-size) / -2);
+  margin-top: calc(var(--handle-dot-size) / -2);
   border-radius: 50%;
   background: var(--c-surface);
   border: var(--handle-dot-border) solid var(--c-brand-500);
-  transform: translate(-50%, -50%);
   opacity: 0;
   transition: opacity var(--t-fast);
   pointer-events: none;
