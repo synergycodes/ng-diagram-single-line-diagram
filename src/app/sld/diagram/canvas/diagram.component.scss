@@ -9,7 +9,7 @@
   // Pin ng-diagram's canvas fill + grid to our tokens so they flip with the
   // theme (--c-* are defined per data-theme, alongside ng-diagram's --ngd-*).
   --ngd-diagram-background-color: var(--c-canvas);
-  --ngd-background-dot-color: var(--c-border);
+  --ngd-background-dot-color: var(--c-grid-minor);
 
   // The symbol node draws its own gold square selection box, so suppress
   // ng-diagram's default node-selection shadow.
@@ -21,10 +21,10 @@
   --ngd-default-edge-stroke-hover: var(--c-text);
   --ngd-default-edge-stroke-selected: var(--c-selection-bd);
 
-  --ngd-background-line-minor-color: var(--c-border);
+  --ngd-background-line-minor-color: var(--c-grid-minor);
   --ngd-background-line-minor-opacity: 0.7;
   --ngd-background-line-minor-width: 0.5px;
-  --ngd-background-line-major-color: var(--c-border-strong);
+  --ngd-background-line-major-color: var(--c-grid-major);
   --ngd-background-line-major-opacity: 0.75;
   --ngd-background-line-major-width: 0.75px;
 }

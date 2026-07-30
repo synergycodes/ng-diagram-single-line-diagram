@@ -16,6 +16,12 @@ app-diagram ng-diagram-base-edge.default-edge.selected {
   --edge-stroke-width: 2.5;
 }
 
+// Temporary (mid-gesture) edge renders exactly like the final wire.
+// `:not(.selected)` only out-specifies the library rule that dims it to 0.5.
+app-diagram ng-diagram-base-edge.default-edge.temporary:not(.selected) {
+  --edge-stroke-opacity: 1;
+}
+
 app-diagram ng-diagram-base-edge path {
   stroke-linecap: round;
   stroke-linejoin: round;
