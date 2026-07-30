@@ -36,7 +36,7 @@ export const SYMBOLS = [
       { key: 'tag', label: 'Tag', type: 'text' },
       { key: 'ratedVoltage', label: 'Rated voltage', type: 'number', unit: 'kV' },
       { key: 'ratedCurrent', label: 'Rated current', type: 'number', unit: 'A' },
-      { key: 'breakingCapacity', label: 'Breaking cap.', type: 'number', unit: 'kA/1s' },
+      { key: 'breakingCapacity', label: 'Breaking cap.', type: 'number', unit: 'kA' },
       {
         key: 'interruptingMedium',
         label: 'Medium',

@@ -1,7 +1,13 @@
 import type { FormlyFieldConfig } from '@ngx-formly/core';
 import type { PropertyDef } from '../../../symbols/types';
 
-// `<input type="number">` emits strings — parsers coerce back to numeric so JSON-serialised data stays typed.
+export function parseDecimal(value: unknown): number | null {
+  if (value == null || value === '') return null;
+  if (typeof value === 'number') return value;
+  const parsed = Number(String(value).trim().replace(',', '.'));
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
 export function fieldFromPropertyDef(property: PropertyDef): FormlyFieldConfig {
   if (property.type === 'select') {
     return {
@@ -19,11 +25,7 @@ export function fieldFromPropertyDef(property: PropertyDef): FormlyFieldConfig {
     props: {
       label: property.label,
       unit: property.unit,
-      inputType: property.type === 'number' ? 'number' : 'text',
+      inputMode: property.type === 'number' ? 'decimal' : undefined,
     },
-    parsers:
-      property.type === 'number'
-        ? [(value) => (value === '' || value == null ? null : Number(value))]
-        : undefined,
   };
 }

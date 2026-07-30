@@ -15,7 +15,7 @@ export const SYMBOL_REGISTRY: readonly SymbolDef[] = [
     bodyViewBox: {"x":3,"y":27,"width":16,"height":23},
     terminals: [{"id":"terminal-bottom","side":"bottom","xPct":50,"yPct":100},{"id":"terminal-top","side":"top","xPct":50,"yPct":0}],
     defaultData: {"tag":"Q","ratedVoltage":245,"ratedCurrent":3150},
-    propertySchema: [{"key":"tag","label":"Tag","type":"text"},{"key":"ratedVoltage","label":"Rated voltage","type":"number","unit":"kV"},{"key":"ratedCurrent","label":"Rated current","type":"number","unit":"A"},{"key":"breakingCapacity","label":"Breaking cap.","type":"number","unit":"kA/1s"},{"key":"interruptingMedium","label":"Medium","type":"select","options":["SF6","vacuum","oil","air"]}],
+    propertySchema: [{"key":"tag","label":"Tag","type":"text"},{"key":"ratedVoltage","label":"Rated voltage","type":"number","unit":"kV"},{"key":"ratedCurrent","label":"Rated current","type":"number","unit":"A"},{"key":"breakingCapacity","label":"Breaking cap.","type":"number","unit":"kA"},{"key":"interruptingMedium","label":"Medium","type":"select","options":["SF6","vacuum","oil","air"]}],
     svgBody: `
   <line x1="11" y1="50" x2="3" y2="27" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
   <line x1="9" y1="28" x2="13" y2="32" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" fill="none"/>

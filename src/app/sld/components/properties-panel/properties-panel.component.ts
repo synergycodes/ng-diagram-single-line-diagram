@@ -13,7 +13,7 @@ import { FormlyFieldConfig, FormlyForm } from '@ngx-formly/core';
 import { NgDiagramModelService, NgDiagramSelectionService, type Node } from 'ng-diagram';
 import { isSymbolNode, type SldSymbolNodeData } from '../../diagram/core/geometry/node-types';
 import { SymbolRegistryService } from '../../symbols/symbol-registry.service';
-import { fieldFromPropertyDef } from './formly/field-from-property-def';
+import { fieldFromPropertyDef, parseDecimal } from './formly/field-from-property-def';
 import { IconComponent } from '../../shared/icons';
 
 type PropertyModel = Record<string, string | number | boolean>;
@@ -106,13 +106,27 @@ export class PropertiesPanelComponent {
 
   // Push each form edit back to the model, merging changed keys over the node's
   // existing properties (Formly emits the full model, but only some keys change).
+  // Number-typed keys are coerced here so node data only ever stores numbers.
   protected onModelChange(model: PropertyModel): void {
     const current = this.selectedNode();
-    if (!current) return;
+    const def = this.selectedSymbolDef();
+    if (!current || !def) return;
+
+    const properties: Record<string, string | number | boolean> = { ...current.data.properties };
+    for (const property of def.propertySchema) {
+      if (!(property.key in model)) continue;
+      if (property.type === 'number') {
+        const parsed = parseDecimal(model[property.key]);
+        if (parsed === null) delete properties[property.key];
+        else properties[property.key] = parsed;
+      } else {
+        properties[property.key] = model[property.key];
+      }
+    }
 
     this.modelService.updateNodeData<SldSymbolNodeData>(current.id, {
       symbolId: current.data.symbolId,
-      properties: { ...current.data.properties, ...model },
+      properties,
     });
   }
 }

@@ -7,7 +7,9 @@
   </span>
   <input
     class="sld-field__input"
-    [type]="props['inputType'] || 'text'"
+    type="text"
+    [attr.inputmode]="props['inputMode'] || null"
+    (beforeinput)="onBeforeInput($event)"
     [formControl]="formControl"
     [formlyAttributes]="field"
   />
