@@ -147,10 +147,10 @@ export class DiagramComponent {
 
   async onNodeRotateEnded(event: NodeRotateEndedEvent): Promise<void> {
     const nodeId = event.node.id;
-    await this.ngDiagramService.transaction(
-      () => this.ngDiagramService.invalidateMeasurements({ nodes: [{ nodeId }] }),
-      { waitForMeasurements: true },
-    );
+    // Awaited directly (not via a transaction) — since 1.3 a transaction waits
+    // only for measurements caused by its own model changes, so wrapping this
+    // would resolve before the rotated ports are re-measured.
+    await this.ngDiagramService.invalidateMeasurements({ nodes: [{ nodeId }] });
     applyEdgeStretchOnSelectionMoved(this.modelService, new Set([nodeId]));
   }
 

@@ -14,6 +14,9 @@ class FakeModelService {
   edges(): readonly Edge[] {
     return this.edgeList;
   }
+  getModel(): { getEdges(): Edge[] } {
+    return { getEdges: () => this.edgeList };
+  }
   getNodeById(id: string): Node | undefined {
     return this.nodes.get(id);
   }
