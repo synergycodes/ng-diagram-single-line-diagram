@@ -1,8 +1,12 @@
 # SLD Builder
 
-An Angular 19 configurator for **single-line diagrams** (SLDs) of high-voltage
-electrical substations, built on [ng-diagram](https://www.ngdiagram.dev). The
-symbol library targets the **IEC 60617** graphical standard and is curated for
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
+
+_Live demo: [https://www.ngdiagram.dev/templates/single-line-diagram/](https://www.ngdiagram.dev/templates/single-line-diagram/)_
+
+An Angular 19 configurator for **single-line diagrams** (SLDs, also called
+one-line diagrams) of high-voltage electrical substations, built on [ng-diagram](https://www.ngdiagram.dev). 
+The symbol library targets the **IEC 60617** graphical standard and is curated for
 HV transmission work (>=110 kV): switchgear, transformers, instrument
 transformers, and compensation.
 
