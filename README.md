@@ -6,9 +6,10 @@ _Live demo: [https://www.ngdiagram.dev/templates/single-line-diagram/](https://w
 
 An Angular 19 configurator for **single-line diagrams** (SLDs, also called
 one-line diagrams) of high-voltage electrical substations, built on [ng-diagram](https://www.ngdiagram.dev). 
-The symbol library targets the **IEC 60617** graphical standard and is curated for
-HV transmission work (>=110 kV): switchgear, transformers, instrument
-transformers, and compensation.
+The symbol library targets the **IEC 60617** graphical standard: switchgear,
+transformers, instrument transformers, and compensation. The bundled set was
+curated against HV transmission work (>=110 kV), but the symbols and the node
+model are voltage-agnostic — MV and LV distribution work the same way.
 
 It doubles as a reference template for building a domain-specific node editor on
 ng-diagram: a custom node/edge model, a generated symbol pipeline,
