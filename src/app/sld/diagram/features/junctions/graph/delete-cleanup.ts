@@ -14,16 +14,13 @@ interface DeleteCleanupDeps {
 }
 
 // Post-delete junction maintenance, run on every selection-removed event:
-// demote a deleted junction's wires to dangling, then reconcile survivors —
+// demote a deleted junction's edges to dangling, then reconcile survivors —
 // drop empties and merge 2-branch passthroughs. Keeps the graph free of stale
 // junctions left behind when a user deletes a node or edge.
 //
-// Deleting a node cascade-deletes its edges before this event fires, so a
-// deleted junction's wires are already gone from the model — demotion re-adds
-// them from the event snapshot with the junction end anchored at its centre.
-// Only the event read is synchronous; the model edits run async because the
-// handler fires before the nodes()/edges() signals refresh, so the survivor
-// scan goes through getModel() instead.
+// A deleted junction's wires are cascade-deleted with it, so demotion re-adds
+// them from the event snapshot, anchored at the junction centre. The model is
+// read through getModel() — the nodes()/edges() signals lag this event.
 export function applyDeleteCleanup(deps: DeleteCleanupDeps, event: SelectionRemovedEvent): void {
   const deletedNodeIds = new Set(event.deletedNodes.map((node) => node.id));
   const junctionAnchors = new Map<string, Point>();
@@ -57,7 +54,6 @@ export function applyDeleteCleanup(deps: DeleteCleanupDeps, event: SelectionRemo
 async function runCleanup(deps: DeleteCleanupDeps, demoted: readonly Edge[]): Promise<void> {
   const { modelService, ngDiagramService } = deps;
 
-  // Awaitable since 1.3 — the reconcile scan below must see the re-added wires.
   if (demoted.length > 0) {
     await modelService.addEdges([...demoted]);
   }
