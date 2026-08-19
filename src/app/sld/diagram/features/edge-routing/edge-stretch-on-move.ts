@@ -10,7 +10,9 @@ export function applyEdgeStretchOnSelectionMoved(
   movedNodeIds: ReadonlySet<string>,
 ): void {
   const patches: { id: string; points: Point[] }[] = [];
-  for (const edge of modelService.edges()) {
+  // getModel() rather than the edges() signal: callers may run after an await,
+  // where the signal can lag the committed model.
+  for (const edge of modelService.getModel().getEdges()) {
     if (edge.routingMode !== 'manual') continue;
     if (!edge.points || edge.points.length < 2) continue;
     // Skip before the getNodeById + portWorldPosition probe below.
