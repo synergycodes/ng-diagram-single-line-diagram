@@ -1,3 +1,4 @@
+import { INITIAL_SCHEMATIC_NAME } from '../diagram/model/initial-model';
 import { SchematicNameService } from './schematic-name.service';
 
 describe('SchematicNameService', () => {
@@ -7,8 +8,8 @@ describe('SchematicNameService', () => {
     service = new SchematicNameService();
   });
 
-  it('defaults to "Untitled SLD"', () => {
-    expect(service.name()).toBe('Untitled SLD');
+  it('starts on the seeded diagram name', () => {
+    expect(service.name()).toBe(INITIAL_SCHEMATIC_NAME);
   });
 
   it('trims and keeps a non-empty name', () => {

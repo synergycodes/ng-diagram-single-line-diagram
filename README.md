@@ -39,7 +39,7 @@ npm install
 npm start
 ```
 
-Open [http://localhost:4200](http://localhost:4200) — the canvas starts empty, with the symbol library on the left. Drag a two-winding transformer and a circuit breaker onto the canvas, draw a wire between their terminals, then drop a second wire onto the first to see a junction appear. There is no seed diagram to replace: what you draw is the model.
+Open [http://localhost:4200](http://localhost:4200) — the canvas opens on an example 220/110 kV transformer bay, with the symbol library on the left. Click a symbol to edit its properties, drag another one in from the library and wire it terminal-to-terminal, then drop a wire onto an existing one to see a junction appear. The example lives in `src/app/sld/diagram/model/initial-model.ts`; empty that file's placements and the canvas starts blank.
 
 ## Scripts
 
@@ -69,6 +69,10 @@ or relinking an edge onto another edge splits it and creates a real
 `sld-junction` node at the meeting point. A separate overlay paints connection
 dots wherever 3+ wire-continuations coincide; those dots are derived from world
 positions every render and never stored, so they can't drift from the geometry.
+
+The starting diagram in `diagram/model/initial-model.ts` is plain model data —
+symbol placements on the 8 px grid, sized from the symbol registry, plus the
+links between their terminals.
 
 ### Node types
 

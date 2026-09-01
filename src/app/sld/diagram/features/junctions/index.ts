@@ -28,6 +28,10 @@ export { applyDeleteCleanup } from './graph/delete-cleanup';
 // it dragged an endpoint away from.
 export { reconcileJunction } from './graph/junction-cleanup';
 
+// Builds a junction node at a world centre — the shape an edge split
+// materialises.
+export { junctionNodeAt } from './graph/junction-geometry';
+
 // Middleware that keeps junction-incident edges routed cleanly (stub-less off
 // the dot, no two branches leaving collinear). The canvas composes it into the
 // ng-diagram middleware chain.

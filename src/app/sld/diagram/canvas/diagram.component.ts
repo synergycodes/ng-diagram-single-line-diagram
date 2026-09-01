@@ -15,7 +15,6 @@ import {
   NgDiagramModelService,
   NgDiagramNodeTemplateMap,
   NgDiagramService,
-  type DiagramInitEvent,
   type EdgeDrawEndedEvent,
   type NodeRotateEndedEvent,
   type SelectionMovedEvent,
@@ -31,6 +30,7 @@ import {
   provideJunctions,
 } from '../features/junctions';
 import { EdgeReshapeOverlayComponent } from '../features/edge-reshape';
+import { buildInitialModel } from '../model/initial-model';
 import { LinkDrawService, provideLinking } from '../features/linking';
 import { LinkDropPreviewOverlayComponent } from '../features/link-drop-preview';
 import { provideRelink, RelinkGestureService, RelinkOverlayComponent } from '../features/relink';
@@ -130,11 +130,11 @@ export class DiagramComponent {
     modelService: this.modelService,
   });
 
-  readonly model = initializeModel({ nodes: [], edges: [] });
+  readonly model = initializeModel(buildInitialModel(this.registry));
 
   protected readonly minimapNodeStyle = buildMinimapNodeStyle(this.registry);
 
-  protected onDiagramInit(_event: DiagramInitEvent): void {
+  protected onDiagramInit(): void {
     // Expose the exports to page-level chrome (the navbar Export buttons).
     // File name follows the current schematic name.
     this.exportBridge.register({

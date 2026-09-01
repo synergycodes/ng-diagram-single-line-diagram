@@ -1,5 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { INITIAL_SCHEMATIC_NAME } from '../diagram/model/initial-model';
 
+// Fallback once the user clears the field; the app starts on the seeded bay's name.
 const DEFAULT_NAME = 'Untitled SLD';
 
 /** Holds the name of the schematic being built. Shared by the navbar (rename)
@@ -7,7 +9,7 @@ const DEFAULT_NAME = 'Untitled SLD';
  *  scopes (page vs. diagram). */
 @Injectable({ providedIn: 'root' })
 export class SchematicNameService {
-  readonly name = signal(DEFAULT_NAME);
+  readonly name = signal<string>(INITIAL_SCHEMATIC_NAME);
 
   /** Filesystem-safe base name for the exported SVG (no extension). */
   readonly fileName = computed(() => toSafeFileName(this.name()));

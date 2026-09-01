@@ -8,6 +8,7 @@ import {
   portKind,
   type SldLinkEdgeData,
 } from '../geometry/node-types';
+import { INITIAL_FIT_PADDING } from '../../model/initial-model';
 
 // ng-diagram bridge: the single place that translates SLD rules (grid, snapping,
 // orthogonal routing, connection validity, edge decoration) into an
@@ -83,8 +84,9 @@ export function buildDiagramConfig(deps: {
       finalEdgeDataBuilder: (edge: Edge): Edge => decorateEdgeForKind(edge, registry, modelService),
     },
     zoom: {
-      // Toolbar "fit" is the explicit recentre.
-      zoomToFit: { onInit: false },
+      // The canvas opens on the seeded diagram, so frame it on init; the
+      // padding keeps it clear of the chrome floating over the canvas.
+      zoomToFit: { onInit: true, padding: INITIAL_FIT_PADDING },
     },
   };
 }
